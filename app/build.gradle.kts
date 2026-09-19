@@ -25,6 +25,8 @@ android {
         }
     }
 
+    testOptions { unitTests.isIncludeAndroidResources = true }
+
     buildFeatures {
         compose = true
     }
@@ -66,4 +68,5 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.16.1")
 }

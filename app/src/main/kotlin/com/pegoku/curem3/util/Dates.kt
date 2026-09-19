@@ -39,7 +39,8 @@ object Dates {
     fun inDays(context: Context, date: LocalDate, today: LocalDate = LocalDate.now()): String {
         val days = ChronoUnit.DAYS.between(today, date).toInt()
         return when {
-            days <= 0 -> context.getString(R.string.today)
+            days < 0 -> context.resources.getQuantityString(R.plurals.days_ago, -days, -days)
+            days == 0 -> context.getString(R.string.today)
             days == 1 -> context.getString(R.string.tomorrow)
             else -> context.resources.getQuantityString(R.plurals.in_days, days, days)
         }

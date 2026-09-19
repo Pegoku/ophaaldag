@@ -94,7 +94,7 @@ fun WasteDetailScreen(data: CureData, type: String, onBack: () -> Unit) {
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text(data.labelFor(type)) },
+                title = { Text(data.labelFor(type), style = MaterialTheme.typography.headlineMedium) },
                 navigationIcon = { BackIcon(onBack) },
                 scrollBehavior = scrollBehavior,
             )
@@ -102,8 +102,8 @@ fun WasteDetailScreen(data: CureData, type: String, onBack: () -> Unit) {
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
             Row(Modifier.padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                WasteIcon(type, size = 72.dp)
-                Column {
+                WasteIcon(type, size = 56.dp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (next.isNotEmpty()) {
                         Text(stringResource(R.string.next_pickup), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(Dates.long(next.first().localDate!!), style = MaterialTheme.typography.titleLarge)
@@ -219,7 +219,7 @@ fun HtmlPageScreen(title: String, html: String, onBack: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { LargeFlexibleTopAppBar(title = { Text(title) }, navigationIcon = { BackIcon(onBack) }, scrollBehavior = scrollBehavior) },
+        topBar = { LargeFlexibleTopAppBar(title = { Text(title, style = MaterialTheme.typography.headlineMedium) }, navigationIcon = { BackIcon(onBack) }, scrollBehavior = scrollBehavior) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
             HtmlText(html)

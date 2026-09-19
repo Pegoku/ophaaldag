@@ -18,6 +18,7 @@
 package com.pegoku.curem3.data
 
 import android.content.Context
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -90,6 +91,9 @@ class CureRepository(
             _state.update { it.copy(data = parsed, loading = false, error = null) }
             onDataChanged(parsed)
             Result.success(parsed)
+        } catch (e: CancellationException) {
+            _state.update { it.copy(loading = false) }
+            throw e
         } catch (e: Exception) {
             val message = when (e) {
                 is CureParser.ApiException -> e.message ?: "API error"

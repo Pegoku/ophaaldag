@@ -18,12 +18,27 @@
 package com.pegoku.curem3
 
 import com.pegoku.curem3.ui.components.cleanHtml
+import com.pegoku.curem3.ui.components.collapseBlankLines
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HtmlCleanTest {
+    @Test
+    fun compactHtmlParagraphsKeepSpacingAndHeadingStyle() {
+        val original = AnnotatedString.Builder("Intro\nHeading\nBody\n\n\n").apply {
+            addStyle(SpanStyle(fontWeight = FontWeight.Bold), 6, 13)
+        }.toAnnotatedString()
+        val result = original.collapseBlankLines()
+        assertEquals("Intro\n\nHeading\n\nBody", result.text)
+        assertEquals(7, result.spanStyles.single().start)
+        assertEquals(14, result.spanStyles.single().end)
+    }
+
     @Test
     fun listsGetBulletsAndHeadingsBecomeBoldParagraphs() {
         val out = cleanHtml("<h4 class=\"x\">Title</h4>\r\n<ul>\r\n<li>One</li>\r\n<li>Two</li>\r\n</ul>")

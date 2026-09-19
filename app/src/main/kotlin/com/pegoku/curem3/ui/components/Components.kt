@@ -137,7 +137,7 @@ internal fun cleanHtml(html: String): String = html
     .replace(Regex("<p[^>]*>\\s*<br\\s*/?>", RegexOption.IGNORE_CASE), "<p>")
     .trim()
 
-/** Trims leading/trailing newlines and collapses 3+ consecutive newlines to a paragraph break. */
+/** Trims edge newlines and gives CMS paragraphs and headings breathing room. */
 internal fun AnnotatedString.collapseBlankLines(): AnnotatedString {
     val builder = AnnotatedString.Builder()
     var i = 0
@@ -149,7 +149,7 @@ internal fun AnnotatedString.collapseBlankLines(): AnnotatedString {
             while (j < length && text[j] == '\n') j++
             builder.append(subSequence(start, i))
             val atEdge = builder.length == 0 || j == length
-            if (!atEdge) builder.append(if (j - i >= 2) "\n\n" else "\n")
+            if (!atEdge) builder.append("\n\n")
             start = j
             i = j
         } else i++
@@ -192,7 +192,7 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
 @Composable
 fun DetailTopBar(title: String, onBack: () -> Unit, scrollBehavior: TopAppBarScrollBehavior? = null, actions: @Composable () -> Unit = {}) {
     TopAppBar(
-        title = { Text(title, maxLines = 1) },
+        title = { Text(title, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
         navigationIcon = {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) }
         },

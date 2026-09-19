@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
 sealed interface AddressResult {
@@ -70,13 +72,19 @@ class AppViewModel(private val app: CureApplication) : ViewModel() {
     }
 
     suspend fun lookupStreets(postcode: String): List<String> =
-        runCatching { api.streetList(postcode) }.getOrDefault(emptyList())
+        try {
+            api.streetList(postcode)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            emptyList()
+        }
 
-    suspend fun submitAddress(address: Address): AddressResult {
-        return try {
+    suspend fun submitAddress(address: Address): AddressResult = viewModelScope.async {
+        try {
             when (api.tinyCheck(address)) {
-                CureApi.TinyResult.UNKNOWN_POSTCODE -> return AddressResult.UnknownPostcode
-                CureApi.TinyResult.NO_DATA -> return AddressResult.NoData
+                CureApi.TinyResult.UNKNOWN_POSTCODE -> return@async AddressResult.UnknownPostcode
+                CureApi.TinyResult.NO_DATA -> return@async AddressResult.NoData
                 CureApi.TinyResult.OK -> Unit
             }
             val result = app.repository.changeAddress(address)
@@ -90,12 +98,14 @@ class AppViewModel(private val app: CureApplication) : ViewModel() {
                     }
                 },
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: IOException) {
             AddressResult.Offline
         } catch (e: Exception) {
             AddressResult.Error(e.message ?: e.javaClass.simpleName)
         }
-    }
+    }.await()
 
     fun clearAddress() {
         viewModelScope.launch { app.repository.clearAddress() }
