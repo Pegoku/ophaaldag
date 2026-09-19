@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -125,7 +125,7 @@ fun AnnouncementsScreen(data: CureData, onBack: () -> Unit, onOpen: (String) -> 
     val list = data.announcements.sortedBy { !it.isActive(today) }
     Scaffold(topBar = { DetailTopBar(stringResource(R.string.announcements), onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
-            items(list, key = { it.id }) { a ->
+            itemsIndexed(list) { _, a ->
                 ListItem(
                     headlineContent = { Text(a.title) },
                     supportingContent = { Text(a.description.ifBlank { a.text.replace(Regex("<[^>]+>"), "").trim() }, maxLines = 2) },
@@ -167,7 +167,7 @@ fun AnnouncementDetailScreen(data: CureData, id: String, onBack: () -> Unit) {
 fun MessagesScreen(data: CureData, onBack: () -> Unit) {
     Scaffold(topBar = { DetailTopBar(stringResource(R.string.messages_history), onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(data.pushMessages, key = { it.date + it.message.hashCode() }) { m ->
+            itemsIndexed(data.pushMessages) { _, m ->
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Column(Modifier.padding(16.dp)) {
                         Text(m.date.take(16), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -184,7 +184,7 @@ fun MessagesScreen(data: CureData, onBack: () -> Unit) {
 fun TipsScreen(data: CureData, onBack: () -> Unit) {
     Scaffold(topBar = { DetailTopBar(stringResource(R.string.tips), onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(data.tips, key = { it.title }) { t ->
+            itemsIndexed(data.tips) { _, t ->
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow), shape = MaterialTheme.shapes.extraLarge) {
                     Column(Modifier.padding(20.dp)) {
                         Text(t.title, style = MaterialTheme.typography.titleLarge)
@@ -244,7 +244,7 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
                     }
                 }
             }
-            items(sorted, key = { it.first.address + it.first.latitude + it.first.longitude + it.first.wasteType }) { (c, dist) ->
+            itemsIndexed(sorted) { _, (c, dist) ->
                 ContainerRow(data, c, dist) {
                     val uri = "geo:${c.latitude},${c.longitude}?q=${c.latitude},${c.longitude}(${Uri.encode(c.address)})".toUri()
                     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }

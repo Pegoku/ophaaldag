@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
@@ -71,7 +71,7 @@ fun GuideScreen(data: CureData, onOpenWaste: (String) -> Unit) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
                 if (trimmed.length < 2) {
                     item { SectionTitle(stringResource(R.string.waste_streams)) }
-                    items(data.separation, key = { it.iconName }) { info ->
+                    itemsIndexed(data.separation) { _, info ->
                         ListItem(
                             headlineContent = { Text(info.afvalTitle) },
                             leadingContent = { WasteIcon(info.iconName) },
@@ -90,7 +90,7 @@ fun GuideScreen(data: CureData, onOpenWaste: (String) -> Unit) {
                     }
                 } else {
                     item { SectionTitle(stringResource(R.string.guide_results, results.size)) }
-                    items(results, key = { it.key }) { (item, types) ->
+                    itemsIndexed(results) { _, (item, types) ->
                         ListItem(
                             headlineContent = { Text(item.replaceFirstChar { it.uppercase() }) },
                             supportingContent = {

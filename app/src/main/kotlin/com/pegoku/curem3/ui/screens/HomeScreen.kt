@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Settings
@@ -142,7 +143,7 @@ fun HomeScreen(
                             TextButton(onClick = onOpenAnnouncements) { Text(stringResource(R.string.see_all)) }
                         }
                     }
-                    items(announcements.take(3), key = { it.id }) { a ->
+                    itemsIndexed(announcements.take(3)) { _, a ->
                         Card(
                             onClick = { onOpenAnnouncement(a.id) },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
