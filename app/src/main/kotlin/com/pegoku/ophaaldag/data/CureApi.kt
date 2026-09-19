@@ -102,6 +102,6 @@ class CureApi(
         const val API_KEY = "5ef443e778f41c4f75c69459eea6e6ae0c2d92de729aa0fc61653815fbd6a8ca"
         const val APP_NAME = "cure"
         const val UPSTREAM_VERSION = "5.40"
-        const val USER_AGENT = "ophaaldag/0.1 (Android)"
+        const val USER_AGENT = "ophaaldag/1.0 (Android)"
     }
 }

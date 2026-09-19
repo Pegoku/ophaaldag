@@ -51,6 +51,12 @@ class CureParserTest {
     }
 
     @Test
+    fun includesNextYearDatesWhenServicePublishesThem() {
+        val future = """{"response":"OK","data":{"ophaaldagen":{"response":"OK","data":[{"type":"papier","date":"2026-12-25"}]},"ophaaldagenNext":{"response":"OK","data":[{"type":"papier","date":"2027-01-08"},{"type":"papier","date":"2026-12-25"}]}}}"""
+        assertEquals(listOf("2026-12-25", "2027-01-08"), CureParser.parse(future).pickups.map { it.date })
+    }
+
+    @Test
     fun labelsComeFromSeparationInfo() {
         assertEquals("Restafval", data.labelFor("restafval"))
         assertEquals("Papier en karton", data.labelFor("papier"))
