@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,7 +52,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun CalendarScreen(data: CureData, onOpenWaste: (String) -> Unit) {
@@ -151,11 +151,12 @@ private fun MonthGrid(
     val offset = first.dayOfWeek.value - DayOfWeek.MONDAY.value
     val days = month.lengthOfMonth()
     val rows = (offset + days + 6) / 7
+    val locale = LocalLocale.current.platformLocale
     Column(Modifier.padding(horizontal = 12.dp)) {
         Row(Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach { dow ->
                 Text(
-                    dow.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                    dow.getDisplayName(TextStyle.NARROW, locale),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium,

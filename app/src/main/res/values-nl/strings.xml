@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Cure M3</string>
     <string name="widget_label">Volgende ophaaldag</string>
     <string name="widget_description">Toont je volgende ophaaldagen.</string>
     <string name="widget_no_address">Open de app om je adres in te stellen</string>
