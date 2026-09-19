@@ -53,6 +53,9 @@ The official APK was pulled from a phone with `adb pull`, decompiled with jadx, 
 network calls in `HttpSpul`, `PhonePostcodeSelect`, `MyFirebaseServerUtilities` and friends
 were traced and then verified live. Decompiled sources and the APK are not part of this repo.
 
+## Privacy
+
+Read the [privacy policy](https://pegoku.github.io/ophaaldag/privacy.html).
 
 ## Calendar updates
 
