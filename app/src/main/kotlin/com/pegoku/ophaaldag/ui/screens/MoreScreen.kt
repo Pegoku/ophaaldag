@@ -79,7 +79,7 @@ fun MoreScreen(data: CureData, onNavigate: (String) -> Unit) {
         })
         add(listOf(
             MoreItem(Icons.Outlined.Settings, stringResource(R.string.settings)) { onNavigate(Routes.SETTINGS) },
-            MoreItem(Icons.Outlined.Description, stringResource(R.string.privacy_policy)) { uriHandler.openUri("https://pegoku.github.io/ophaaldag-site/privacy.html") },
+            MoreItem(Icons.Outlined.Description, stringResource(R.string.privacy_policy)) { uriHandler.openUri("https://pegoku.github.io/ophaaldag/privacy.html") },
             MoreItem(Icons.Outlined.Code, stringResource(R.string.source_code), "github.com/Pegoku/ophaaldag") { uriHandler.openUri("https://github.com/Pegoku/ophaaldag") },
         ))
     }
