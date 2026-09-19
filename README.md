@@ -17,6 +17,14 @@ Not affiliated with Cure Afvalbeheer or AddComm.
 - Offline: the last document is cached and shown instantly; pull to refresh
 - Dynamic colour (Material You) with a Cure-green fallback palette, Dutch and English UI
 
+## App icon
+
+The [SVG logo](artwork/cure-m3.svg) uses `currentColor` for easy recoloring when
+embedded inline on the web. Its matching Android vector supplies both the normal
+white-on-green launcher icon and the monochrome adaptive icon. On Android 13+
+with a supported launcher, enable **Themed icons** in the launcher's wallpaper/style
+settings to use system wallpaper colors automatically.
+
 ## Build
 
 Requirements: JDK 17+, Android SDK with platform 37 (Android Studio installs it).
