@@ -233,3 +233,5 @@ Documented for completeness:
 * Waste-type ids seen: `restafval`, `gft`, `papier`, `pmd`, `glas`, `textiel`, `grofvuil`,
   `milieustraat`, `elec`, `kca`, `asbest`, `sloopafval`, plus `takken`, `kerstbomen`, `pbd`,
   `drocos`, `luiers` in other municipalities.
+
+Address examples other than DEMOCURE are synthetic and are not valid reviewer credentials.

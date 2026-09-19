@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "cure-m3"
+rootProject.name = "ophaaldag"
 include(":app")

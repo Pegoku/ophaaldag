@@ -31,33 +31,39 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Lint
-        run: ./gradlew :app:lintDebug
+      - name: Lint release and run unit tests
+        run: ./gradlew :app:lintRelease :app:testDebugUnitTest
 
-      - name: Unit tests
-        run: ./gradlew :app:testDebugUnitTest
-
-      - name: Build debug APK
-        run: ./gradlew :app:assembleDebug
-
-      - name: Build release APK
-        run: ./gradlew :app:assembleRelease
-
-      - name: Sign release APK
-        if: ${{ env.KEYSTORE_B64 != '' }}
+      - name: Prepare upload key
+        if: github.event_name != 'pull_request'
         env:
           KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            umask 077
+            printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            echo "KEYSTORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build APKs and Play bundle
+        env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_B64" | base64 -d > release.jks
+          ./gradlew :app:assembleDebug :app:assembleRelease :app:bundleRelease \
+            -PversionCode=$((1000 + GITHUB_RUN_NUMBER))
+
+      - name: Verify release signatures
+        if: env.KEYSTORE_FILE != ''
+        run: |
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
-          "$BT/zipalign" -p 4 app/build/outputs/apk/release/app-release-unsigned.apk app-release-aligned.apk
-          "$BT/apksigner" sign --ks release.jks --ks-pass env:KEYSTORE_PASSWORD \
-            --ks-key-alias "$KEY_ALIAS" --key-pass env:KEY_PASSWORD \
-            --out app/build/outputs/apk/release/app-release.apk app-release-aligned.apk
-          rm -f release.jks app-release-aligned.apk
+          "$BT/apksigner" verify app/build/outputs/apk/release/app-release.apk
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+
+      - name: Remove upload key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
 
       - name: Upload test and lint reports
         if: always()
@@ -75,6 +81,12 @@ jobs:
           name: apks
           path: app/build/outputs/apk/**/*.apk
 
+      - name: Upload Play bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: play-bundle
+          path: app/build/outputs/bundle/release/*.aab
+
       - name: GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -82,4 +94,5 @@ jobs:
           files: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/release/app-release.apk
+            app/build/outputs/bundle/release/app-release.aab
           generate_release_notes: true

@@ -1,0 +1,16 @@
+Unofficial and not affiliated with Cure Afvalbeheer or AddComm.
+
+Ophaaldag helps you keep track of waste collections for supported addresses in Eindhoven, Geldrop-Mierlo and Valkenswaard.
+
+• See your next pickup and browse a monthly calendar.
+• Set optional collection reminders.
+• Read waste sorting guidance and find nearby containers.
+• Add a home screen widget.
+• Sync pickup events to a calendar you choose, or export a one-time .ics file.
+• Use English or Dutch, light or dark themes, and Android dynamic colours.
+
+New calendar dates appear when the waste service publishes them. Background updates depend on Android scheduling and network access. An imported .ics file does not update automatically.
+
+No ads, analytics SDK or app account. Your address is sent to api.mijnafvalwijzer.nl to retrieve your schedule. Calendar access and notifications are optional.
+
+Free software under GPL-3.0-or-later. Corresponding source is available on request from pegoku08@gmail.com.

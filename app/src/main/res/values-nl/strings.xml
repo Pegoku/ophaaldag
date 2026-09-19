@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cure M3</string>
+    <string name="app_name">Ophaaldag</string>
     <string name="widget_label">Volgende ophaaldag</string>
     <string name="widget_description">Toont je volgende ophaaldagen.</string>
     <string name="widget_no_address">Open de app om je adres in te stellen</string>
@@ -102,7 +102,7 @@
     <string name="open_system_settings">Instellingen openen</string>
     <string name="appearance">Weergave</string>
     <string name="dynamic_color">Kleuren van achtergrond gebruiken</string>
-    <string name="dynamic_color_desc">Uit gebruikt het Cure-groene palet</string>
+    <string name="dynamic_color_desc">Uit gebruikt het groene palet</string>
     <string name="language">Taal van de inhoud</string>
     <string name="language_auto">Systeemtaal</string>
     <string name="language_nl">Nederlands</string>
@@ -120,13 +120,15 @@
     <string name="channel_service_desc">Storingen en mededelingen van Cure.</string>
     <string name="calendar">Agenda</string>
     <string name="calendar_sync">Toevoegen aan agenda</string>
-    <string name="calendar_sync_desc">Ophaaldagen als hele-dag-afspraken, automatisch bijgewerkt</string>
+    <string name="calendar_sync_desc">Voegt nieuwe datums toe zodra Cure ze publiceert. Android kan updates op de achtergrond uitstellen.</string>
     <string name="calendar_synced_to">Gesynchroniseerd met “%1$s”</string>
     <string name="calendar_pick">Kies een agenda</string>
     <string name="calendar_none">Geen beschrijfbare agenda gevonden op dit toestel.</string>
     <string name="calendar_events_added">%1$s afspraken toegevoegd</string>
     <string name="calendar_share">Exporteren als .ics</string>
-    <string name="calendar_share_desc">Importeren in een agenda-app of delen</string>
+    <string name="calendar_share_desc">Eenmalige .ics-export. Geïmporteerde datums worden niet automatisch bijgewerkt.</string>
     <string name="calendar_event_title">%1$s ophalen</string>
     <string name="calendar_name">Afvalkalender %1$s</string>
+    <string name="calendar_disclosure">Ophaaldag leest de namen en accounts van agenda’s op je apparaat zodat je een agenda kunt kiezen. De app voegt eigen ophaalafspraken toe, werkt ze bij en verwijdert ze, ook op de achtergrond. Je agendaprovider (zoals Google) kan deze afspraken met je account synchroniseren. De inhoud van andere afspraken wordt niet gelezen of naar Cure verzonden. Schakel synchronisatie hier uit om de afspraken te verwijderen.</string>
+    <string name="privacy_policy">Privacybeleid</string>
 </resources>

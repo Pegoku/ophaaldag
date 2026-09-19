@@ -1,0 +1,16 @@
+Onofficieel en niet verbonden aan Cure Afvalbeheer of AddComm.
+
+Met Ophaaldag houd je afvalinzamelingen bij voor ondersteunde adressen in Eindhoven, Geldrop-Mierlo en Valkenswaard.
+
+• Bekijk je volgende ophaaldag en de maandkalender.
+• Stel optionele ophaalherinneringen in.
+• Lees informatie over afvalscheiding en vind containers in de buurt.
+• Voeg een widget toe aan je startscherm.
+• Synchroniseer ophaalafspraken met een gekozen agenda of exporteer een eenmalig .ics-bestand.
+• Gebruik Nederlands of Engels, een licht of donker thema en dynamische Android-kleuren.
+
+Nieuwe datums verschijnen zodra de afvaldienst ze publiceert. Updates op de achtergrond zijn afhankelijk van Android en je netwerkverbinding. Een geïmporteerd .ics-bestand wordt niet automatisch bijgewerkt.
+
+Geen advertenties, analytics-SDK of app-account. Je adres wordt naar api.mijnafvalwijzer.nl verzonden om je ophaalschema op te halen. Agendatoegang en meldingen zijn optioneel.
+
+Vrije software onder GPL-3.0-or-later. Bijbehorende broncode is op aanvraag beschikbaar via pegoku08@gmail.com.

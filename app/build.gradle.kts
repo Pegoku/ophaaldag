@@ -1,24 +1,46 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
 
+val signingProperties = Properties().apply {
+    val config = rootProject.file("keystore.properties")
+    if (config.isFile) config.inputStream().use { load(it) }
+}
+fun signingValue(property: String, environment: String): String? =
+    signingProperties.getProperty(property) ?: providers.environmentVariable(environment).orNull
+val uploadStore = signingValue("storeFile", "KEYSTORE_FILE")
+
 android {
-    namespace = "com.pegoku.curem3"
+    namespace = "com.pegoku.ophaaldag"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.pegoku.curem3"
+        applicationId = "com.pegoku.ophaaldag"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = providers.gradleProperty("versionCode").orElse("2").get().toInt()
+        versionName = providers.gradleProperty("versionName").orElse("1.0.0").get()
         resourceConfigurations += listOf("en", "nl")
+    }
+
+    signingConfigs {
+        if (uploadStore != null) {
+            create("release") {
+                storeFile = rootProject.file(uploadStore!!)
+                storePassword = requireNotNull(signingValue("storePassword", "KEYSTORE_PASSWORD"))
+                keyAlias = requireNotNull(signingValue("keyAlias", "KEY_ALIAS"))
+                keyPassword = requireNotNull(signingValue("keyPassword", "KEY_PASSWORD"))
+            }
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

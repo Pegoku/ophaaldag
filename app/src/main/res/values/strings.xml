@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cure M3</string>
+    <string name="app_name">Ophaaldag</string>
     <string name="widget_label">Next pickup</string>
     <string name="widget_description">Shows your next waste pickups.</string>
     <string name="widget_no_address">Open the app to set your address</string>
@@ -109,7 +109,7 @@
     <string name="open_system_settings">Open settings</string>
     <string name="appearance">Appearance</string>
     <string name="dynamic_color">Use wallpaper colours</string>
-    <string name="dynamic_color_desc">Off uses the Cure green palette</string>
+    <string name="dynamic_color_desc">Off uses the green palette</string>
     <string name="language">Content language</string>
     <string name="language_auto">Follow system</string>
     <string name="language_nl">Nederlands</string>
@@ -128,13 +128,15 @@
     <string name="channel_service_desc">Disruptions and announcements from Cure.</string>
     <string name="calendar">Calendar</string>
     <string name="calendar_sync">Add to device calendar</string>
-    <string name="calendar_sync_desc">Mirror pickup days as all-day events, kept up to date automatically</string>
+    <string name="calendar_sync_desc">Automatically adds new dates when Cure publishes them. Android may delay background updates.</string>
     <string name="calendar_synced_to">Synced to “%1$s”</string>
     <string name="calendar_pick">Choose a calendar</string>
     <string name="calendar_none">No writable calendar found on this device.</string>
     <string name="calendar_events_added">%1$s events added</string>
     <string name="calendar_share">Export .ics file</string>
-    <string name="calendar_share_desc">Import into any calendar app or share it</string>
+    <string name="calendar_share_desc">One-time .ics export. Imported dates do not update automatically.</string>
     <string name="calendar_event_title">%1$s pickup</string>
     <string name="calendar_name">Waste calendar %1$s</string>
+    <string name="calendar_disclosure">Ophaaldag reads the names and accounts of calendars on your device so you can choose one. It adds, updates and removes its own pickup events in that calendar, including in the background. Your calendar provider (such as Google) may sync these events to your account. Other event contents are not read or sent to Cure. You can turn sync off here to remove the events.</string>
+    <string name="privacy_policy">Privacy policy</string>
 </resources>
