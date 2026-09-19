@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_label">Volgende ophaaldag</string>
+    <string name="widget_description">Toont je volgende ophaaldagen.</string>
+    <string name="widget_no_address">Open de app om je adres in te stellen</string>
+    <string name="channel_reminders">Ophaalherinneringen</string>
+    <string name="channel_reminders_desc">Herinnert je eraan om je afval buiten te zetten.</string>
+    <string name="reminder_title">Ophaaldag %1$s</string>
+    <string name="reminder_body">Buiten zetten: %1$s. Wordt %2$s opgehaald.</string>
+
+    <string name="today">Vandaag</string>
+    <string name="tomorrow">Morgen</string>
+    <plurals name="in_days">
+        <item quantity="one">Over %d dag</item>
+        <item quantity="other">Over %d dagen</item>
+    </plurals>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_calendar">Kalender</string>
+    <string name="nav_guide">Afval-ABC</string>
+    <string name="nav_more">Meer</string>
+    <string name="back">Terug</string>
+    <string name="close">Sluiten</string>
+    <string name="retry">Opnieuw</string>
+    <string name="refresh">Vernieuwen</string>
+    <string name="settings">Instellingen</string>
+    <string name="search">Zoeken</string>
+    <string name="clear">Wissen</string>
+
+    <string name="onboarding_title">Je adres</string>
+    <string name="onboarding_subtitle">Vul je adres in om te zien wanneer je afval wordt opgehaald. Werkt voor Eindhoven, Geldrop-Mierlo en Valkenswaard.</string>
+    <string name="postcode">Postcode</string>
+    <string name="postcode_hint">1234 AB</string>
+    <string name="house_number">Huisnummer</string>
+    <string name="suffix">Toevoeging</string>
+    <string name="street">Straat</string>
+    <string name="continue_">Doorgaan</string>
+    <string name="checking">Adres controleren…</string>
+    <string name="loading_calendar">Kalender laden…</string>
+    <string name="error_unknown_postcode">Deze postcode is niet bekend. Controleer de cijfers en letters.</string>
+    <string name="error_no_data">Geen afvalgegevens voor dit adres. Controleer huisnummer en toevoeging.</string>
+    <string name="error_offline">Je bent offline. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="error_generic">Er ging iets mis: %1$s</string>
+    <string name="demo_address">Probeer een demo-adres</string>
+
+    <string name="next_pickup">Volgende ophaaldag</string>
+    <string name="coming_up">Binnenkort</string>
+    <string name="no_upcoming">Geen ophaaldagen meer in de huidige kalender.</string>
+    <string name="announcements">Mededelingen</string>
+    <string name="see_all">Alles</string>
+    <string name="updated_ago">Bijgewerkt %1$s</string>
+    <string name="just_now">zojuist</string>
+    <plurals name="minutes_ago"><item quantity="one">%d minuut geleden</item><item quantity="other">%d minuten geleden</item></plurals>
+    <plurals name="hours_ago"><item quantity="one">%d uur geleden</item><item quantity="other">%d uur geleden</item></plurals>
+    <plurals name="days_ago"><item quantity="one">%d dag geleden</item><item quantity="other">%d dagen geleden</item></plurals>
+    <string name="offline_banner">Offline, opgeslagen gegevens</string>
+    <string name="showing_cached">Vernieuwen mislukt, opgeslagen gegevens</string>
+    <string name="other_pickups_same_day">Ook die dag</string>
+
+    <string name="previous_month">Vorige maand</string>
+    <string name="next_month">Volgende maand</string>
+    <string name="this_month">Deze maand</string>
+    <string name="no_pickups_month">Geen ophaaldagen deze maand.</string>
+    <string name="all_types">Alles</string>
+
+    <string name="guide_title">Afvalwijzer</string>
+    <string name="guide_search_hint">Waar hoort het? bijv. batterijen</string>
+    <string name="guide_no_results">Niets gevonden voor “%1$s”.</string>
+    <string name="guide_results">%1$d resultaten</string>
+    <string name="waste_streams">Afvalstromen</string>
+    <string name="goes_in">Hoort bij</string>
+
+    <string name="more_title">Meer</string>
+    <string name="containers_nearby">Containers in de buurt</string>
+    <string name="containers_subtitle">Openbare glas-, papier-, textiel- en restafvalcontainers</string>
+    <string name="messages_history">Berichtgeschiedenis</string>
+    <string name="messages_subtitle">Serviceberichten van Cure</string>
+    <string name="tips">Tips</string>
+    <string name="about_cure">Over Cure</string>
+    <string name="faq">Veelgestelde vragen</string>
+    <string name="about_app">Over deze app</string>
+    <string name="about_app_text">Door de community gemaakte Material 3-app voor de afvalkalender van Cure Afvalbeheer. Niet verbonden aan Cure of AddComm. De gegevens komen van dezelfde openbare dienst als de officiële app.</string>
+    <string name="data_versions">Afvaldata %1$s · Content %2$s</string>
+    <string name="open_in_maps">Openen in Maps</string>
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$.1f km</string>
+    <string name="no_containers">Geen openbare containers bekend voor deze gemeente.</string>
+    <string name="source_code">Broncode</string>
+
+    <string name="address">Adres</string>
+    <string name="change_address">Adres wijzigen</string>
+    <string name="reminders">Herinneringen</string>
+    <string name="reminders_enable">Herinner me vóór een ophaaldag</string>
+    <string name="reminder_when">Wanneer</string>
+    <string name="evening_before">Avond ervoor</string>
+    <string name="morning_of">Ochtend van de ophaaldag</string>
+    <string name="reminder_time">Tijd</string>
+    <string name="reminder_types">Afvalsoorten</string>
+    <string name="reminder_types_all">Alle soorten</string>
+    <string name="notifications_denied">Meldingen staan uit voor deze app. Zet ze aan in de systeeminstellingen om herinneringen te ontvangen.</string>
+    <string name="open_system_settings">Instellingen openen</string>
+    <string name="appearance">Weergave</string>
+    <string name="dynamic_color">Kleuren van achtergrond gebruiken</string>
+    <string name="dynamic_color_desc">Uit gebruikt het Cure-groene palet</string>
+    <string name="language">Taal van de inhoud</string>
+    <string name="language_auto">Systeemtaal</string>
+    <string name="language_nl">Nederlands</string>
+    <string name="language_en">English</string>
+    <string name="next_reminder">Volgende herinnering: %1$s</string>
+    <string name="no_reminder_planned">Geen herinnering gepland</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Annuleren</string>
+</resources>
