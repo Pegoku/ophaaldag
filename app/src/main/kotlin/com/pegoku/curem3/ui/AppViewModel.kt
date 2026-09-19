@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.pegoku.curem3.CureApplication
+import com.pegoku.curem3.calendar.CalendarSync
+import com.pegoku.curem3.calendar.DeviceCalendar
 import com.pegoku.curem3.data.Address
 import com.pegoku.curem3.data.CureApi
 import com.pegoku.curem3.data.CureParser
@@ -85,8 +87,34 @@ class AppViewModel(private val app: CureApplication) : ViewModel() {
     fun setReminders(reminders: ReminderSettings) {
         viewModelScope.launch {
             app.settings.setReminders(reminders)
-            ReminderScheduler.reschedule(app, data.value.data, app.settings.current())
+            val current = app.settings.current()
+            ReminderScheduler.reschedule(app, data.value.data, current)
+            val d = data.value.data
+            if (d != null && current.calendarId != null) CalendarSync.sync(app, current.calendarId, d, reminders)
         }
+    }
+
+    fun setServiceMessages(enabled: Boolean) {
+        viewModelScope.launch { app.settings.setServiceMessages(enabled) }
+    }
+
+    suspend fun writableCalendars(): List<DeviceCalendar> = CalendarSync.writableCalendars(app)
+
+    /** Enables mirroring into [calendar] and performs the first sync. Returns inserted event count. */
+    suspend fun enableCalendar(calendar: DeviceCalendar): Int {
+        app.settings.setCalendar(calendar.id, calendar.name)
+        val d = data.value.data ?: return 0
+        return CalendarSync.sync(app, calendar.id, d, app.settings.current().reminders)
+    }
+
+    suspend fun disableCalendar() {
+        app.settings.current().calendarId?.let { CalendarSync.remove(app, it) }
+        app.settings.setCalendar(null, "")
+    }
+
+    suspend fun shareIcs() {
+        val d = data.value.data ?: return
+        CalendarSync.shareIcs(app, d, app.settings.current().reminders)
     }
 
     fun setDynamicColor(enabled: Boolean) {

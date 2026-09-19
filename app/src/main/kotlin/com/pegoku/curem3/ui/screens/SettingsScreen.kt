@@ -18,7 +18,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.IosShare
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -38,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +50,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import com.pegoku.curem3.R
+import com.pegoku.curem3.calendar.CalendarSync
+import com.pegoku.curem3.calendar.DeviceCalendar
 import com.pegoku.curem3.data.CureData
 import com.pegoku.curem3.data.ReminderSettings
 import com.pegoku.curem3.data.UserSettings
@@ -55,6 +62,7 @@ import com.pegoku.curem3.ui.components.SectionTitle
 import com.pegoku.curem3.ui.components.WasteIcon
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onBack: () -> Unit, onChangeAddress: () -> Unit) {
@@ -66,6 +74,15 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
         notificationsEnabled = granted
     }
     val types = data.pickups.map { it.type }.distinct()
+    val scope = rememberCoroutineScope()
+    var calendars by remember { mutableStateOf<List<DeviceCalendar>>(emptyList()) }
+    var showCalendarPicker by remember { mutableStateOf(false) }
+    var syncMessage by remember { mutableStateOf<String?>(null) }
+    val eventsAdded = stringResource(R.string.calendar_events_added, "%d")
+    val noCalendars = stringResource(R.string.calendar_none)
+    val calendarPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        if (result.values.all { it }) scope.launch { calendars = vm.writableCalendars(); showCalendarPicker = true }
+    }
 
     fun update(block: ReminderSettings.() -> ReminderSettings) = vm.setReminders(reminders.block())
 
@@ -86,12 +103,29 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
                 }
             }
 
-            SectionTitle(stringResource(R.string.reminders), modifier = Modifier.padding(top = 12.dp))
+            SectionTitle(stringResource(R.string.notifications), modifier = Modifier.padding(top = 12.dp))
             Card(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = MaterialTheme.shapes.extraLarge,
             ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.service_messages)) },
+                    supportingContent = { Text(stringResource(R.string.service_messages_desc)) },
+                    trailingContent = {
+                        Switch(
+                            checked = settings.serviceMessages,
+                            onCheckedChange = { on ->
+                                if (on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsEnabled) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                vm.setServiceMessages(on)
+                            },
+                        )
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.clickable { vm.setServiceMessages(!settings.serviceMessages) },
+                )
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.reminders_enable)) },
                     trailingContent = {
@@ -170,6 +204,45 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
                 }
             }
 
+            SectionTitle(stringResource(R.string.calendar), modifier = Modifier.padding(top = 12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.calendar_sync)) },
+                    supportingContent = {
+                        Text(
+                            if (settings.calendarId != null) stringResource(R.string.calendar_synced_to, settings.calendarName)
+                            else stringResource(R.string.calendar_sync_desc),
+                        )
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = settings.calendarId != null,
+                            onCheckedChange = { on ->
+                                if (on) {
+                                    if (CalendarSync.hasPermission(context)) scope.launch { calendars = vm.writableCalendars(); showCalendarPicker = true }
+                                    else calendarPermissionLauncher.launch(arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR))
+                                } else scope.launch { vm.disableCalendar() }
+                            },
+                        )
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                )
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.calendar_share)) },
+                    supportingContent = { Text(stringResource(R.string.calendar_share_desc)) },
+                    leadingContent = { Icon(Icons.Outlined.IosShare, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.clickable { scope.launch { vm.shareIcs() } },
+                )
+                syncMessage?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                }
+            }
+
             SectionTitle(stringResource(R.string.appearance), modifier = Modifier.padding(top = 12.dp))
             Card(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -213,6 +286,29 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
         ) {
             TimePicker(state = state)
         }
+    }
+
+    if (showCalendarPicker) {
+        AlertDialog(
+            onDismissRequest = { showCalendarPicker = false },
+            title = { Text(stringResource(R.string.calendar_pick)) },
+            text = {
+                if (calendars.isEmpty()) Text(noCalendars) else Column {
+                    calendars.forEach { cal ->
+                        ListItem(
+                            headlineContent = { Text(cal.name) },
+                            supportingContent = { Text(cal.account) },
+                            colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                            modifier = Modifier.clickable {
+                                showCalendarPicker = false
+                                scope.launch { val n = vm.enableCalendar(cal); syncMessage = eventsAdded.format(n) }
+                            },
+                        )
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showCalendarPicker = false }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 }
 

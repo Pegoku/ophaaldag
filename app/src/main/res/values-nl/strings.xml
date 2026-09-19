@@ -111,4 +111,22 @@
     <string name="no_reminder_planned">Geen herinnering gepland</string>
     <string name="ok">OK</string>
     <string name="cancel">Annuleren</string>
+
+    <string name="notifications">Meldingen</string>
+    <string name="service_messages">Serviceberichten</string>
+    <string name="service_messages_desc">Meld nieuwe berichten van Cure, zoals storingen</string>
+    <string name="service_message_title">Bericht van Cure</string>
+    <string name="channel_service">Serviceberichten</string>
+    <string name="channel_service_desc">Storingen en mededelingen van Cure.</string>
+    <string name="calendar">Agenda</string>
+    <string name="calendar_sync">Toevoegen aan agenda</string>
+    <string name="calendar_sync_desc">Ophaaldagen als hele-dag-afspraken, automatisch bijgewerkt</string>
+    <string name="calendar_synced_to">Gesynchroniseerd met “%1$s”</string>
+    <string name="calendar_pick">Kies een agenda</string>
+    <string name="calendar_none">Geen beschrijfbare agenda gevonden op dit toestel.</string>
+    <string name="calendar_events_added">%1$s afspraken toegevoegd</string>
+    <string name="calendar_share">Exporteren als .ics</string>
+    <string name="calendar_share_desc">Importeren in een agenda-app of delen</string>
+    <string name="calendar_event_title">%1$s ophalen</string>
+    <string name="calendar_name">Afvalkalender %1$s</string>
 </resources>

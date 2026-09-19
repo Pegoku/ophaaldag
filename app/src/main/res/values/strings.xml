@@ -118,4 +118,23 @@
     <string name="no_reminder_planned">No reminder planned</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+
+    <!-- Notifications & calendar -->
+    <string name="notifications">Notifications</string>
+    <string name="service_messages">Service messages</string>
+    <string name="service_messages_desc">Notify me about new messages from Cure, such as disruptions</string>
+    <string name="service_message_title">Message from Cure</string>
+    <string name="channel_service">Service messages</string>
+    <string name="channel_service_desc">Disruptions and announcements from Cure.</string>
+    <string name="calendar">Calendar</string>
+    <string name="calendar_sync">Add to device calendar</string>
+    <string name="calendar_sync_desc">Mirror pickup days as all-day events, kept up to date automatically</string>
+    <string name="calendar_synced_to">Synced to “%1$s”</string>
+    <string name="calendar_pick">Choose a calendar</string>
+    <string name="calendar_none">No writable calendar found on this device.</string>
+    <string name="calendar_events_added">%1$s events added</string>
+    <string name="calendar_share">Export .ics file</string>
+    <string name="calendar_share_desc">Import into any calendar app or share it</string>
+    <string name="calendar_event_title">%1$s pickup</string>
+    <string name="calendar_name">Waste calendar %1$s</string>
 </resources>

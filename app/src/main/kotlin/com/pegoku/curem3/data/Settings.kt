@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -32,6 +33,13 @@ data class UserSettings(
     val language: String = "auto",
     val dynamicColor: Boolean = true,
     val reminders: ReminderSettings = ReminderSettings(),
+    /** Notify about new service messages (pushData) found during background refresh. */
+    val serviceMessages: Boolean = true,
+    /** Device calendar the pickups are mirrored into, or null when off. */
+    val calendarId: Long? = null,
+    val calendarName: String = "",
+    /** Newest pushData `date` the user has been notified about. */
+    val lastSeenPush: String = "",
 ) {
     fun apiLanguage(): String = when (language) {
         "nl", "en" -> language
@@ -52,6 +60,10 @@ class SettingsRepository(private val context: Context) {
         val remHour = intPreferencesKey("rem_hour")
         val remMinute = intPreferencesKey("rem_minute")
         val remTypes = stringSetPreferencesKey("rem_types")
+        val serviceMessages = booleanPreferencesKey("service_messages")
+        val calendarId = longPreferencesKey("calendar_id")
+        val calendarName = stringPreferencesKey("calendar_name")
+        val lastSeenPush = stringPreferencesKey("last_seen_push")
     }
 
     val settings: Flow<UserSettings> = context.settingsStore.data.map { p -> p.toSettings() }
@@ -75,6 +87,10 @@ class SettingsRepository(private val context: Context) {
                 minute = this[Keys.remMinute] ?: 0,
                 types = this[Keys.remTypes] ?: emptySet(),
             ),
+            serviceMessages = this[Keys.serviceMessages] ?: true,
+            calendarId = this[Keys.calendarId],
+            calendarName = this[Keys.calendarName] ?: "",
+            lastSeenPush = this[Keys.lastSeenPush] ?: "",
         )
     }
 
@@ -93,6 +109,14 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLanguage(language: String) = context.settingsStore.edit { it[Keys.language] = language }
     suspend fun setDynamicColor(enabled: Boolean) = context.settingsStore.edit { it[Keys.dynamicColor] = enabled }
+
+    suspend fun setServiceMessages(enabled: Boolean) = context.settingsStore.edit { it[Keys.serviceMessages] = enabled }
+    suspend fun setLastSeenPush(date: String) = context.settingsStore.edit { it[Keys.lastSeenPush] = date }
+    suspend fun setCalendar(id: Long?, name: String) {
+        context.settingsStore.edit { p ->
+            if (id == null) { p.remove(Keys.calendarId); p.remove(Keys.calendarName) } else { p[Keys.calendarId] = id; p[Keys.calendarName] = name }
+        }
+    }
 
     suspend fun setReminders(r: ReminderSettings) {
         context.settingsStore.edit { p ->

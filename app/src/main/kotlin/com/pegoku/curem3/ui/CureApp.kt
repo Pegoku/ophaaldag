@@ -92,7 +92,7 @@ fun CureApp(vm: AppViewModel) {
             when {
                 s == null || !dataState.cacheLoaded -> FullScreenLoading()
                 s.address == null -> AddressScreen(vm = vm, onBack = null, onDone = {})
-                dataState.data == null && dataState.loading -> FullScreenLoading(stringResource(R.string.loading_calendar))
+                dataState.data == null && (dataState.loading || dataState.error == null) -> FullScreenLoading(stringResource(R.string.loading_calendar))
                 dataState.data == null -> ErrorState(
                     message = errorMessage(dataState.error),
                     onRetry = { vm.refresh() },

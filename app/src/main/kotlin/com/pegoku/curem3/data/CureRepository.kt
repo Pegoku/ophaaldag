@@ -88,7 +88,7 @@ class CureRepository(
     suspend fun changeAddress(address: Address): Result<CureData> {
         settings.setAddress(address)
         withContext(Dispatchers.IO) { cacheFile.delete() }
-        _state.update { DataState(cacheLoaded = true) }
+        _state.update { DataState(cacheLoaded = true, loading = true) }
         return refresh(force = true)
     }
 

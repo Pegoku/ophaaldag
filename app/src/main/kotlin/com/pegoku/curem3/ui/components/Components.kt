@@ -90,22 +90,55 @@ fun HtmlText(
         AnnotatedString.fromHtml(
             cleanHtml(html),
             linkStyles = TextLinkStyles(style = SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)),
-        ).trimTrailingNewlines()
+        ).collapseBlankLines()
     }
-    Text(annotated, modifier = modifier, style = style)
+    Text(annotated, modifier = modifier, style = style.copy(lineHeight = style.fontSize * 1.5f))
 }
 
-private fun cleanHtml(html: String): String = html
+/**
+ * Normalises the CMS fragments the API returns so `Html.fromHtml` renders them well:
+ * headings become bold paragraphs, list items get real bullets (BulletSpan is dropped by
+ * the AnnotatedString conversion), tables degrade to lines, images and empty paragraphs go.
+ */
+internal fun cleanHtml(html: String): String = html
     .replace("\r\n", "\n")
-    .replace(Regex("<h[1-6][^>]*>"), "<p><b>")
-    .replace(Regex("</h[1-6]>"), "</b></p>")
-    .replace(Regex("<img[^>]*>"), "")
+    .replace(Regex("<!--.*?-->", RegexOption.DOT_MATCHES_ALL), "")
+    .replace(Regex("<(script|style)[^>]*>.*?</\\1>", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.IGNORE_CASE)), "")
+    .replace(Regex("<img[^>]*>", RegexOption.IGNORE_CASE), "")
+    .replace(Regex("<h[1-6][^>]*>", RegexOption.IGNORE_CASE), "<p><b>")
+    .replace(Regex("</h[1-6]>", RegexOption.IGNORE_CASE), "</b></p>")
+    .replace(Regex("<(div|section|article|blockquote|tr)[^>]*>", RegexOption.IGNORE_CASE), "<p>")
+    .replace(Regex("</(div|section|article|blockquote|tr)>", RegexOption.IGNORE_CASE), "</p>")
+    .replace(Regex("</?(ul|ol|table|tbody|thead)[^>]*>", RegexOption.IGNORE_CASE), "")
+    .replace(Regex("<li[^>]*>", RegexOption.IGNORE_CASE), "<p>&#8226;&nbsp;&nbsp;")
+    .replace(Regex("</li>", RegexOption.IGNORE_CASE), "</p>")
+    .replace(Regex("</t[dh]>\\s*<t[dh][^>]*>", RegexOption.IGNORE_CASE), " - ")
+    .replace(Regex("</?t[dh][^>]*>", RegexOption.IGNORE_CASE), "")
+    .replace(Regex("<p[^>]*>(\\s|&nbsp;|<br\\s*/?>)*</p>", RegexOption.IGNORE_CASE), "")
+    .replace(Regex("(<br\\s*/?>\\s*){2,}", RegexOption.IGNORE_CASE), "<br>")
+    .replace(Regex("<br\\s*/?>\\s*</p>", RegexOption.IGNORE_CASE), "</p>")
+    .replace(Regex("<p[^>]*>\\s*<br\\s*/?>", RegexOption.IGNORE_CASE), "<p>")
     .trim()
 
-private fun AnnotatedString.trimTrailingNewlines(): AnnotatedString {
-    var end = length
-    while (end > 0 && text[end - 1] == '\n') end--
-    return if (end == length) this else subSequence(0, end)
+/** Trims leading/trailing newlines and collapses 3+ consecutive newlines to a paragraph break. */
+internal fun AnnotatedString.collapseBlankLines(): AnnotatedString {
+    val builder = AnnotatedString.Builder()
+    var i = 0
+    var start = 0
+    // Walk runs of newlines, copying the source (with styles) in slices.
+    while (i < length) {
+        if (text[i] == '\n') {
+            var j = i
+            while (j < length && text[j] == '\n') j++
+            builder.append(subSequence(start, i))
+            val atEdge = builder.length == 0 || j == length
+            if (!atEdge) builder.append(if (j - i >= 2) "\n\n" else "\n")
+            start = j
+            i = j
+        } else i++
+    }
+    if (start < length) builder.append(subSequence(start, length))
+    return builder.toAnnotatedString()
 }
 
 @Composable
