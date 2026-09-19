@@ -24,3 +24,5 @@ app/release/
 *.jks
 /keystore.properties
 re/samples/*.txt
+
+docs/internal/
