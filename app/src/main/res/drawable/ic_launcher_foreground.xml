@@ -4,13 +4,19 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Keep the mark within the adaptive icon's central 66dp safe zone.
+    <!-- Match the visual size of other themed launcher marks after adaptive-icon cropping.
          The launcher recolors this same silhouette for themed icons. -->
-    <path
-        android:fillColor="@android:color/transparent"
-        android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="3.4"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M 76,36 C 65.2194,21.101617 44,23 33,37 22,51 26,69 38,79 50,89 66,86 76,75 l -8,-7 c -8,9 -21,8 -28,0 -7,-8 -7,-19 1,-27 7,-7 15.357968,-7.949192 23.577367,-2.762125 m 12.300231,-9.408776 0.646651,8.949192 -8.424942,-0.949192" />
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.52"
+        android:scaleY="0.52">
+        <path
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="3.4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 76,36 C 65.2194,21.101617 44,23 33,37 22,51 26,69 38,79 50,89 66,86 76,75 l -8,-7 c -8,9 -21,8 -28,0 -7,-8 -7,-19 1,-27 7,-7 15.357968,-7.949192 23.577367,-2.762125 m 12.300231,-9.408776 0.646651,8.949192 -8.424942,-0.949192" />
+    </group>
 </vector>
