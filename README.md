@@ -45,3 +45,23 @@ The official APK was pulled from a phone with `adb pull`, decompiled with jadx, 
 network calls in `HttpSpul`, `PhonePostcodeSelect`, `MyFirebaseServerUtilities` and friends
 were traced and then verified live. Decompiled sources and the APK are not part of this repo.
 
+
+## License
+
+Copyright (C) 2026 Pere Gomila.
+
+Cure M3 is free software, licensed under the
+[GNU General Public License v3.0 or later](LICENSE).
+
+This is a copyleft licence. In short, if you distribute this app or anything derived from
+it - a fork, a rebranded build, an app that reuses parts of this code - you must:
+
+- release your version's **complete source code** under the GPL v3 (or later) as well,
+- **keep the copyright notice and credit the original author, Pere Gomila**, and link back
+  to <https://github.com/Pegoku/cure-m3>,
+- state what you changed, and pass on these same freedoms to your users.
+
+You may not relicense this code under a proprietary or closed-source licence. See the
+[LICENSE](LICENSE) file for the full terms, which are what legally apply.
+
+Pull requests are welcome and are accepted under the same licence.
