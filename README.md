@@ -44,3 +44,4 @@ re/samples/    Trimmed real API response used as a unit-test fixture
 The official APK was pulled from a phone with `adb pull`, decompiled with jadx, and the
 network calls in `HttpSpul`, `PhonePostcodeSelect`, `MyFirebaseServerUtilities` and friends
 were traced and then verified live. Decompiled sources and the APK are not part of this repo.
+

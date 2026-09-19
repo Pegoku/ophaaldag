@@ -62,7 +62,7 @@ fun MoreScreen(data: CureData, onNavigate: (String) -> Unit) {
         })
         add(listOf(
             MoreItem(Icons.Outlined.Settings, stringResource(R.string.settings)) { onNavigate(Routes.SETTINGS) },
-            MoreItem(Icons.Outlined.Code, stringResource(R.string.source_code), "github.com/pegoku/cure-m3") { uriHandler.openUri("https://github.com/pegoku/cure-m3") },
+            MoreItem(Icons.Outlined.Code, stringResource(R.string.source_code), "github.com/Pegoku/cure-m3") { uriHandler.openUri("https://github.com/Pegoku/cure-m3") },
         ))
     }
 
