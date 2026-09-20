@@ -26,3 +26,7 @@ app/release/
 re/samples/*.txt
 
 docs/internal/
+
+# Agent instructions (local, not shared)
+/AGENTS.md
+/CLAUDE.md
