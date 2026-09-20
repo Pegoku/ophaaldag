@@ -55,9 +55,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.pegoku.ophaaldag.R
 import com.pegoku.ophaaldag.data.Address
@@ -67,6 +71,27 @@ import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import kotlinx.coroutines.launch
 
 private val POSTCODE = Regex("^[1-9][0-9]{3}[A-Z]{2}$")
+
+/** Number of digits before the letter pair in a Dutch postcode. */
+private const val DIGITS = 4
+
+/**
+ * Renders the stored (space-free) postcode as `1234 AB` while the user types. Left alone for
+ * anything that does not start with a digit, so `DEMOCURE` stays in one piece.
+ */
+private object PostcodeSpacing : VisualTransformation {
+    private val mapping = object : OffsetMapping {
+        override fun originalToTransformed(offset: Int) = if (offset <= DIGITS) offset else offset + 1
+        override fun transformedToOriginal(offset: Int) = if (offset <= DIGITS) offset else offset - 1
+    }
+
+    override fun filter(text: AnnotatedString): TransformedText {
+        val raw = text.text
+        if (raw.length <= DIGITS || !raw.first().isDigit()) return TransformedText(text, OffsetMapping.Identity)
+        val spaced = raw.take(DIGITS) + " " + raw.drop(DIGITS)
+        return TransformedText(AnnotatedString(spaced), mapping)
+    }
+}
 
 @Composable
 fun AddressScreen(vm: AppViewModel, onBack: (() -> Unit)?, onDone: () -> Unit) {
@@ -132,11 +157,12 @@ fun AddressScreen(vm: AppViewModel, onBack: (() -> Unit)?, onDone: () -> Unit) {
 
             OutlinedTextField(
                 value = postcode,
-                onValueChange = { postcode = it.uppercase().take(8) },
+                onValueChange = { postcode = it.filterNot { c -> c.isWhitespace() }.uppercase().take(8) },
                 label = { Text(stringResource(R.string.postcode)) },
                 placeholder = { Text(stringResource(R.string.postcode_hint)) },
                 singleLine = true,
                 isError = postcode.length >= 6 && !postcodeValid,
+                visualTransformation = PostcodeSpacing,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Next),
                 shape = MaterialTheme.shapes.large,
                 modifier = Modifier.fillMaxWidth(),
