@@ -22,8 +22,8 @@ android {
         applicationId = "com.pegoku.ophaaldag"
         minSdk = 26
         targetSdk = 36
-        versionCode = providers.gradleProperty("versionCode").orElse("2").get().toInt()
-        versionName = providers.gradleProperty("versionName").orElse("1.0.0").get()
+        versionCode = providers.gradleProperty("versionCode").orElse("3").get().toInt()
+        versionName = providers.gradleProperty("versionName").orElse("1.0.1").get()
         resourceConfigurations += listOf("en", "nl")
     }
 
