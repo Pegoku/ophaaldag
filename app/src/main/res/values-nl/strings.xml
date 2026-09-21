@@ -87,8 +87,9 @@
     <string name="distance_km">%1$.1f km</string>
     <string name="no_containers">Geen openbare containers bekend voor deze gemeente.</string>
     <string name="containers_open_all">Alles op de kaart tonen</string>
-    <string name="containers_export_count">%1$d containers · gegroepeerd per afvalsoort</string>
+    <string name="containers_export_count">%1$d in de buurt, gekleurd per afvalsoort</string>
     <string name="no_map_app">Geen app op deze telefoon kan een kaartbestand openen.</string>
+    <string name="containers_export_kml">Exporteren als KML</string>
     <string name="source_code">Broncode</string>
 
     <string name="address">Adres</string>

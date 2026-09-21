@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.util.Base64
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -60,7 +59,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -84,8 +82,6 @@ import com.pegoku.ophaaldag.ui.components.HtmlText
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.util.Dates
 import com.pegoku.ophaaldag.util.MapPlace
-import com.pegoku.ophaaldag.util.MapShare
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -239,7 +235,7 @@ fun HtmlPageScreen(title: String, html: String, onBack: () -> Unit) {
 }
 
 @Composable
-fun ContainersScreen(data: CureData, onBack: () -> Unit) {
+fun ContainersScreen(data: CureData, onBack: () -> Unit, onOpenMap: (String) -> Unit) {
     val context = LocalContext.current
     var filter by rememberSaveable { mutableStateOf("") }
     val lat = data.info.lat
@@ -252,9 +248,7 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
             .sortedBy { if (it.second.isNaN()) Double.MAX_VALUE else it.second }
             .take(80)
     }
-    val scope = rememberCoroutineScope()
     val title = stringResource(R.string.containers_nearby)
-    val noMapApp = stringResource(R.string.no_map_app)
     Scaffold(topBar = { DetailTopBar(title, onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
             if (data.containers.isEmpty()) {
@@ -284,14 +278,7 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 4.dp)
                             .clip(MaterialTheme.shapes.large)
-                            .clickable {
-                                val places = sorted.map { (c, dist) -> c.toMapPlace(data, context, dist) }
-                                scope.launch {
-                                    if (!MapShare.sharePlaces(context, title, places)) {
-                                        Toast.makeText(context, noMapApp, Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                            },
+                            .clickable { onOpenMap(filter) },
                     )
                 }
             }
@@ -306,7 +293,7 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
 }
 
 /** One pin for the whole-list KML export: named by address, foldered and coloured by waste stream. */
-private fun ContainerLocation.toMapPlace(data: CureData, context: Context, dist: Double): MapPlace {
+internal fun ContainerLocation.toMapPlace(data: CureData, context: Context, dist: Double): MapPlace {
     val label = data.labelFor(wasteType)
     return MapPlace(
         name = address.ifBlank { label },
@@ -318,7 +305,7 @@ private fun ContainerLocation.toMapPlace(data: CureData, context: Context, dist:
     )
 }
 
-private fun distanceLabel(context: Context, dist: Double): String = when {
+internal fun distanceLabel(context: Context, dist: Double): String = when {
     dist.isNaN() -> ""
     dist < 1000 -> context.getString(R.string.distance_m, dist.roundToInt())
     else -> context.getString(R.string.distance_km, dist / 1000)
@@ -346,7 +333,7 @@ private fun ContainerRow(data: CureData, c: ContainerLocation, dist: Double, onC
     )
 }
 
-private fun distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+internal fun distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val r = 6371000.0
     val dLat = Math.toRadians(lat2 - lat1)
     val dLon = Math.toRadians(lon2 - lon1)

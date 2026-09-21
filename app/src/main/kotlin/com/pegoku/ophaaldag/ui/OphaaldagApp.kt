@@ -68,6 +68,7 @@ import com.pegoku.ophaaldag.ui.screens.AddressScreen
 import com.pegoku.ophaaldag.ui.screens.AnnouncementDetailScreen
 import com.pegoku.ophaaldag.ui.screens.AnnouncementsScreen
 import com.pegoku.ophaaldag.ui.screens.CalendarScreen
+import com.pegoku.ophaaldag.ui.screens.ContainerMapScreen
 import com.pegoku.ophaaldag.ui.screens.ContainersScreen
 import com.pegoku.ophaaldag.ui.screens.GuideScreen
 import com.pegoku.ophaaldag.ui.screens.HomeScreen
@@ -93,6 +94,7 @@ object Routes {
     const val INFO = "info"
     const val SETTINGS = "settings"
     const val ADDRESS = "address"
+    fun containerMap(filter: String) = "containers/map/$filter"
     fun waste(type: String) = "waste/$type"
     fun announcement(id: String) = "announcement/$id"
     fun page(index: Int) = "page/$index"
@@ -201,7 +203,9 @@ private fun MainScaffold(vm: AppViewModel, settings: UserSettings, state: DataSt
                     route.startsWith("announcement/") -> AnnouncementDetailScreen(data, route.removePrefix("announcement/"), onBack = pop)
                     route == Routes.ANNOUNCEMENTS -> AnnouncementsScreen(data, onBack = pop, onOpen = { push(Routes.announcement(it)) })
                     route == Routes.MESSAGES -> MessagesScreen(data, onBack = pop)
-                    route == Routes.CONTAINERS -> ContainersScreen(data, onBack = pop)
+                    route.startsWith("containers/map/") ->
+                        ContainerMapScreen(data, route.removePrefix("containers/map/"), onBack = pop)
+                    route == Routes.CONTAINERS -> ContainersScreen(data, onBack = pop, onOpenMap = { push(Routes.containerMap(it)) })
                     route == Routes.TIPS -> TipsScreen(data, onBack = pop)
                     route == Routes.FAQ -> HtmlPageScreen(stringResource(R.string.faq), data.faqHtml ?: "", onBack = pop)
                     route == Routes.INFO -> HtmlPageScreen(stringResource(R.string.about_cure), data.moreInfoHtml ?: "", onBack = pop)
