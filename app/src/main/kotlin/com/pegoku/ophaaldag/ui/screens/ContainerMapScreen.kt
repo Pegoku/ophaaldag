@@ -200,7 +200,10 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
             )
         }
 
-        clusters.forEach { cluster ->
+        // Farthest first, so the nearest pins end up last in the overlay list: osmdroid draws in
+        // list order and hit-tests in reverse, so those are the ones drawn on top and the ones that
+        // win when two enlarged touch targets overlap.
+        clusters.asReversed().forEach { cluster ->
             val marker = FastMarker(mapView).apply {
                 position = GeoPoint(cluster.latitude, cluster.longitude)
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)

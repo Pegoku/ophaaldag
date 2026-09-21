@@ -33,27 +33,50 @@ object MarkerIcons {
     /** Material's on-surface dark, for the count drawn on the white centre. */
     private val LABEL_COLOR = 0xFF1C1B1F.toInt()
 
+    /**
+     * Every pin is drawn onto a canvas at least this wide, with the visible circle centred and the
+     * remainder transparent.
+     *
+     * osmdroid hit-tests a marker against its icon bounds, so the padding is the touch target: an
+     * 18 dp dot on its own is well under the 48 dp minimum and is genuinely fiddly to hit. The
+     * artwork is unchanged — only the reachable area grows.
+     */
+    private const val MIN_TOUCH_DP = 44f
+
     private val cache = HashMap<String, Drawable>()
+
+    /** A transparent square of at least [MIN_TOUCH_DP], and the offset that centres [visualDp] in it. */
+    private class IconCanvas(context: Context, visualDp: Float) {
+        val visual = dp(context, visualDp)
+        val size = maxOf(visual, dp(context, MIN_TOUCH_DP))
+        val bitmap: Bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        /** Centre of the drawn circle, in bitmap pixels. */
+        val centre = size / 2f
+
+        /** Radius of the visible circle. */
+        val radius = visual / 2f
+    }
 
     /** A container pin. [selected] draws it larger with a hollow centre so the tapped one stands out. */
     fun dot(context: Context, colorArgb: Int, selected: Boolean = false): Drawable =
         cache.getOrPut("dot-$colorArgb-$selected") {
-            val size = dp(context, if (selected) 26f else 18f)
-            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            val c = size / 2f
+            val icon = IconCanvas(context, if (selected) 26f else 18f)
+            val c = icon.centre
+            val r = icon.radius
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
             // White ring first, so the dot stays legible against dark roads and water.
             paint.color = Color.WHITE
-            canvas.drawCircle(c, c, c - dp(context, 1f) / 2f, paint)
+            icon.canvas.drawCircle(c, c, r - dp(context, 1f) / 2f, paint)
             paint.color = colorArgb
-            canvas.drawCircle(c, c, c - dp(context, if (selected) 4f else 3f), paint)
+            icon.canvas.drawCircle(c, c, r - dp(context, if (selected) 4f else 3f), paint)
             if (selected) {
                 paint.color = Color.WHITE
-                canvas.drawCircle(c, c, c - dp(context, 9f), paint)
+                icon.canvas.drawCircle(c, c, r - dp(context, 9f), paint)
             }
-            BitmapDrawable(context.resources, bitmap)
+            BitmapDrawable(context.resources, icon.bitmap)
         }
 
     /**
@@ -64,35 +87,34 @@ object MarkerIcons {
     fun cluster(context: Context, colorsArgb: List<Int>, count: Int, selected: Boolean = false): Drawable {
         if (count <= 1) return dot(context, colorsArgb.firstOrNull() ?: Color.GRAY, selected)
         return cache.getOrPut("cluster-${colorsArgb.joinToString("-")}-$count-$selected") {
-            val size = dp(context, if (selected) 38f else 32f)
-            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(bitmap)
-            val c = size / 2f
+            val icon = IconCanvas(context, if (selected) 38f else 32f)
+            val c = icon.centre
+            val r = icon.radius
             val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
             paint.color = Color.WHITE
-            canvas.drawCircle(c, c, c, paint)
+            icon.canvas.drawCircle(c, c, r, paint)
 
             val inset = dp(context, 2f).toFloat()
-            val box = RectF(inset, inset, size - inset, size - inset)
+            val box = RectF(c - r + inset, c - r + inset, c + r - inset, c + r - inset)
             val sweep = 360f / colorsArgb.size
             colorsArgb.forEachIndexed { index, color ->
                 paint.color = color
                 // -90 so the first wedge starts at the top; a hair of overlap hides seam artefacts.
-                canvas.drawArc(box, -90f + index * sweep, sweep + 0.5f, true, paint)
+                icon.canvas.drawArc(box, -90f + index * sweep, sweep + 0.5f, true, paint)
             }
 
             paint.color = Color.WHITE
-            canvas.drawCircle(c, c, c - dp(context, if (selected) 8f else 7f), paint)
+            icon.canvas.drawCircle(c, c, r - dp(context, if (selected) 8f else 7f), paint)
 
             paint.color = LABEL_COLOR
             paint.textAlign = Paint.Align.CENTER
             paint.isFakeBoldText = true
             paint.textSize = dp(context, if (selected) 14f else 12f).toFloat()
             val baseline = c - (paint.descent() + paint.ascent()) / 2f
-            canvas.drawText(count.toString(), c, baseline, paint)
+            icon.canvas.drawText(count.toString(), c, baseline, paint)
 
-            BitmapDrawable(context.resources, bitmap)
+            BitmapDrawable(context.resources, icon.bitmap)
         }
     }
 
