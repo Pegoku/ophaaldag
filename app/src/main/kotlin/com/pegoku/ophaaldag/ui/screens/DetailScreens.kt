@@ -268,7 +268,6 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit, onOpenMap: (String) -> 
                 item {
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.containers_open_all)) },
-                        supportingContent = { Text(stringResource(R.string.containers_export_count, sorted.size)) },
                         leadingContent = { Icon(Icons.Outlined.Map, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                         modifier = Modifier

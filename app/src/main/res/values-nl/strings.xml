@@ -87,7 +87,6 @@
     <string name="distance_km">%1$.1f km</string>
     <string name="no_containers">Geen openbare containers bekend voor deze gemeente.</string>
     <string name="containers_open_all">Op de kaart tonen</string>
-    <string name="containers_export_count">%1$d in de buurt</string>
     <string name="no_map_app">Geen app op deze telefoon kan een kaartbestand openen.</string>
     <string name="containers_here">%1$d containers hier</string>
     <string name="containers_export_kml">Exporteren als KML</string>
