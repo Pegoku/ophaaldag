@@ -39,6 +39,12 @@ android {
     }
 
     buildTypes {
+        // Suffixed so a locally built debug APK installs alongside the Play/CI release build
+        // instead of replacing it. The launcher and widget names are overridden in src/debug/res.
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
         release {
             signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true

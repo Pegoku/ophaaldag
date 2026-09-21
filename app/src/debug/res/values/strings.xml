@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds install next to the release build; name them so they are easy to tell apart. -->
+<resources>
+    <string name="app_name">Ophaaldag (debug)</string>
+    <string name="widget_label">Next pickup (debug)</string>
+</resources>
