@@ -92,6 +92,9 @@
     <string name="distance_m">%1$d m</string>
     <string name="distance_km">%1$.1f km</string>
     <string name="no_containers">No public containers known for this municipality.</string>
+    <string name="containers_open_all">Show all on a map</string>
+    <string name="containers_export_count">%1$d containers · grouped by waste type</string>
+    <string name="no_map_app">No app on this phone can open a map file.</string>
     <string name="source_code">Source code</string>
 
     <!-- Settings -->

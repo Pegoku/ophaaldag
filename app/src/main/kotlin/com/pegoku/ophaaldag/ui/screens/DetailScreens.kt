@@ -17,9 +17,11 @@
  */
 package com.pegoku.ophaaldag.ui.screens
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.util.Base64
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -39,6 +41,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Directions
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,6 +49,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
@@ -56,12 +60,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -72,10 +78,14 @@ import androidx.core.net.toUri
 import com.pegoku.ophaaldag.R
 import com.pegoku.ophaaldag.data.ContainerLocation
 import com.pegoku.ophaaldag.data.CureData
+import com.pegoku.ophaaldag.data.WasteTypes
 import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import com.pegoku.ophaaldag.ui.components.HtmlText
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.util.Dates
+import com.pegoku.ophaaldag.util.MapPlace
+import com.pegoku.ophaaldag.util.MapShare
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -242,7 +252,10 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
             .sortedBy { if (it.second.isNaN()) Double.MAX_VALUE else it.second }
             .take(80)
     }
-    Scaffold(topBar = { DetailTopBar(stringResource(R.string.containers_nearby), onBack) }) { padding ->
+    val scope = rememberCoroutineScope()
+    val title = stringResource(R.string.containers_nearby)
+    val noMapApp = stringResource(R.string.no_map_app)
+    Scaffold(topBar = { DetailTopBar(title, onBack) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(bottom = 24.dp)) {
             if (data.containers.isEmpty()) {
                 item {
@@ -261,6 +274,27 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
                     }
                 }
             }
+            if (sorted.isNotEmpty()) {
+                item {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.containers_open_all)) },
+                        supportingContent = { Text(stringResource(R.string.containers_export_count, sorted.size)) },
+                        leadingContent = { Icon(Icons.Outlined.Map, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clip(MaterialTheme.shapes.large)
+                            .clickable {
+                                val places = sorted.map { (c, dist) -> c.toMapPlace(data, context, dist) }
+                                scope.launch {
+                                    if (!MapShare.sharePlaces(context, title, places)) {
+                                        Toast.makeText(context, noMapApp, Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            },
+                    )
+                }
+            }
             itemsIndexed(sorted) { _, (c, dist) ->
                 ContainerRow(data, c, dist) {
                     val uri = "geo:${c.latitude},${c.longitude}?q=${c.latitude},${c.longitude}(${Uri.encode(c.address)})".toUri()
@@ -269,6 +303,25 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit) {
             }
         }
     }
+}
+
+/** One pin for the whole-list KML export: named by address, foldered and coloured by waste stream. */
+private fun ContainerLocation.toMapPlace(data: CureData, context: Context, dist: Double): MapPlace {
+    val label = data.labelFor(wasteType)
+    return MapPlace(
+        name = address.ifBlank { label },
+        description = listOf(label, city, distanceLabel(context, dist)).filter { it.isNotBlank() }.joinToString(" \u00b7 "),
+        group = label,
+        latitude = lat!!,
+        longitude = lon!!,
+        colorArgb = WasteTypes.style(wasteType).color.toArgb(),
+    )
+}
+
+private fun distanceLabel(context: Context, dist: Double): String = when {
+    dist.isNaN() -> ""
+    dist < 1000 -> context.getString(R.string.distance_m, dist.roundToInt())
+    else -> context.getString(R.string.distance_km, dist / 1000)
 }
 
 private object Uri {
@@ -284,10 +337,7 @@ private fun ContainerRow(data: CureData, c: ContainerLocation, dist: Double, onC
         trailingContent = {
             Column(horizontalAlignment = Alignment.End) {
                 if (!dist.isNaN()) {
-                    Text(
-                        if (dist < 1000) stringResource(R.string.distance_m, dist.roundToInt()) else stringResource(R.string.distance_km, dist / 1000),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                    Text(distanceLabel(LocalContext.current, dist), style = MaterialTheme.typography.labelLarge)
                 }
                 Icon(Icons.Outlined.Directions, contentDescription = stringResource(R.string.open_in_maps), tint = MaterialTheme.colorScheme.primary)
             }
