@@ -41,7 +41,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Directions
 import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -53,7 +52,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
-import androidx.compose.material3.ToggleButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -79,6 +77,7 @@ import com.pegoku.ophaaldag.data.CureData
 import com.pegoku.ophaaldag.data.WasteTypes
 import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import com.pegoku.ophaaldag.ui.components.HtmlText
+import com.pegoku.ophaaldag.ui.components.WasteFilterChip
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.util.Dates
 import com.pegoku.ophaaldag.util.Geo
@@ -257,11 +256,11 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit, onOpenMap: (String) -> 
             item {
                 Row(
                     Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    ToggleButton(checked = filter.isBlank(), onCheckedChange = { filter = "" }) { Text(stringResource(R.string.all_types)) }
+                    WasteFilterChip(stringResource(R.string.all_types), filter.isBlank(), null) { filter = "" }
                     types.forEach { t ->
-                        ToggleButton(checked = filter == t, onCheckedChange = { filter = if (it) t else "" }) { Text(data.labelFor(t), maxLines = 1) }
+                        WasteFilterChip(data.labelFor(t), filter == t, WasteTypes.style(t).color) { filter = t }
                     }
                 }
             }

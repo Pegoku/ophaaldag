@@ -24,7 +24,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,8 +40,6 @@ import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,8 +57,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -80,6 +75,7 @@ import com.pegoku.ophaaldag.map.MarkerIcons
 import com.pegoku.ophaaldag.map.PdokTiles
 import com.pegoku.ophaaldag.map.clusterContainers
 import com.pegoku.ophaaldag.ui.components.DetailTopBar
+import com.pegoku.ophaaldag.ui.components.WasteFilterChip
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.util.Geo
 import com.pegoku.ophaaldag.util.MapShare
@@ -99,6 +95,9 @@ import kotlin.math.roundToInt
 private const val CLUSTER_RADIUS_DP = 22.0
 
 private const val INITIAL_ZOOM = 15
+
+/** The chips float over map tiles, so they get a shadow to separate them from the basemap. */
+private val CHIP_ELEVATION = 3.dp
 
 /**
  * Every nearby container on one map, coloured by waste stream.
@@ -259,9 +258,15 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                MapChip(stringResource(R.string.all_types), filter.isBlank(), null) { filter = ""; selected = null }
+                WasteFilterChip(stringResource(R.string.all_types), filter.isBlank(), null, elevation = CHIP_ELEVATION) {
+                    filter = ""
+                    selected = null
+                }
                 types.forEach { t ->
-                    MapChip(data.labelFor(t), filter == t, WasteTypes.style(t).color) { filter = t; selected = null }
+                    WasteFilterChip(data.labelFor(t), filter == t, WasteTypes.style(t).color, elevation = CHIP_ELEVATION) {
+                        filter = t
+                        selected = null
+                    }
                 }
             }
 
@@ -326,27 +331,6 @@ private fun ClusterCard(data: CureData, cluster: ContainerCluster?, onDirections
             }
         }
     }
-}
-
-/** Filter chips double as the map legend, so each one is outlined in its stream's pin colour. */
-@Composable
-private fun MapChip(label: String, checked: Boolean, color: Color?, onClick: () -> Unit) {
-    FilterChip(
-        selected = checked,
-        onClick = onClick,
-        label = { Text(label, maxLines = 1) },
-        elevation = FilterChipDefaults.filterChipElevation(elevation = 3.dp),
-        border = color?.let { BorderStroke(if (checked) 2.dp else 1.5.dp, it) },
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            // Blended rather than alpha-tinted: these sit over map tiles, and a translucent
-            // container lets streets through and washes the label out.
-            selectedContainerColor = color
-                ?.let { lerp(MaterialTheme.colorScheme.surface, it, 0.30f) }
-                ?: MaterialTheme.colorScheme.secondaryContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.onSurface,
-        ),
-    )
 }
 
 /** A cluster's streams, in the fixed order the pin's wedges are drawn. */

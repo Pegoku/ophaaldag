@@ -18,6 +18,7 @@
 package com.pegoku.ophaaldag.ui.components
 
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
@@ -48,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -58,6 +62,7 @@ import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +85,48 @@ fun WasteIcon(
     ) {
         Icon(style.icon, contentDescription = null, tint = tint, modifier = Modifier.size(size * 0.55f))
     }
+}
+
+/**
+ * A waste-stream filter chip outlined in that stream's colour.
+ *
+ * The outline is the legend: it is the same colour as the stream's pin on the container map and its
+ * icon in the lists, so a chip tells you what you are looking at without having to tap anything.
+ * Pass a null [color] for an "all types" chip, which belongs to no single stream.
+ *
+ * [elevation] lifts the chip for use over map tiles; on an ordinary surface leave it at zero.
+ */
+@Composable
+fun WasteFilterChip(
+    label: String,
+    selected: Boolean,
+    color: Color?,
+    modifier: Modifier = Modifier,
+    elevation: Dp = 0.dp,
+    onClick: () -> Unit,
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, maxLines = 1) },
+        modifier = modifier,
+        elevation = FilterChipDefaults.filterChipElevation(elevation = elevation),
+        // The "all types" chip has no stream colour, so it falls back to the neutral outline —
+        // without a border it vanishes into a dark background.
+        border = BorderStroke(
+            width = if (selected) 2.dp else 1.5.dp,
+            color = color ?: MaterialTheme.colorScheme.outline,
+        ),
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            // Blended rather than alpha-tinted: over map tiles a translucent container lets the
+            // streets through and washes the label out.
+            selectedContainerColor = color
+                ?.let { lerp(MaterialTheme.colorScheme.surface, it, 0.30f) }
+                ?: MaterialTheme.colorScheme.secondaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
 }
 
 @Composable

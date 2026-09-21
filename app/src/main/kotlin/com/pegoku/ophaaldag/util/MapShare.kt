@@ -53,7 +53,7 @@ object MapShare {
             .putExtra(Intent.EXTRA_SUBJECT, title)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         val intent = if (view.resolveActivity(context.packageManager) != null) view else send
-        val chooser = Intent.createChooser(intent, context.getString(R.string.containers_open_all))
+        val chooser = Intent.createChooser(intent, context.getString(R.string.containers_export_kml))
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return runCatching { context.startActivity(chooser) }.isSuccess
     }
