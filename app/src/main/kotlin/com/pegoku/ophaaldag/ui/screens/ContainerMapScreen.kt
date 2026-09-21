@@ -19,6 +19,12 @@ package com.pegoku.ophaaldag.ui.screens
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +38,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Directions
 import androidx.compose.material.icons.outlined.IosShare
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
@@ -45,7 +50,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,6 +60,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -63,21 +72,33 @@ import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.pegoku.ophaaldag.R
-import com.pegoku.ophaaldag.data.ContainerLocation
 import com.pegoku.ophaaldag.data.CureData
 import com.pegoku.ophaaldag.data.WasteTypes
+import com.pegoku.ophaaldag.map.ContainerCluster
+import com.pegoku.ophaaldag.map.FastMarker
 import com.pegoku.ophaaldag.map.MarkerIcons
 import com.pegoku.ophaaldag.map.PdokTiles
+import com.pegoku.ophaaldag.map.clusterContainers
 import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import com.pegoku.ophaaldag.ui.components.WasteIcon
+import com.pegoku.ophaaldag.util.Geo
 import com.pegoku.ophaaldag.util.MapShare
 import kotlinx.coroutines.launch
-import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.events.MapEventsReceiver
+import kotlin.math.roundToInt
+
+/** Radius, in dp on screen, within which containers collapse into one cluster pin. */
+private const val CLUSTER_RADIUS_DP = 22.0
+
+private const val INITIAL_ZOOM = 15
 
 /**
  * Every nearby container on one map, coloured by waste stream.
@@ -91,21 +112,34 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var filter by rememberSaveable { mutableStateOf(initialFilter) }
-    var selected by remember { mutableStateOf<ContainerLocation?>(null) }
+    var selected by remember { mutableStateOf<ContainerCluster?>(null) }
+    var zoom by remember { mutableIntStateOf(INITIAL_ZOOM) }
 
-    val home = remember(data) { data.info.lat?.let { lat -> data.info.lon?.let { lon -> GeoPoint(lat, lon) } } }
+    val home = remember(data) {
+        data.info.lat?.let { lat -> data.info.lon?.let { lon -> GeoPoint(lat, lon) } }
+    }
     val types = remember(data) { data.containers.map { it.wasteType }.distinct().sorted() }
     val shown = remember(data, filter) {
         val lat = data.info.lat
         val lon = data.info.lon
         data.containers
             .filter { filter.isBlank() || it.wasteType == filter }
-            .sortedBy { c -> if (lat != null && lon != null) distanceMeters(lat, lon, c.lat!!, c.lon!!) else 0.0 }
+            .sortedBy { c ->
+                if (lat != null && lon != null) Geo.distanceMeters(lat, lon, c.lat!!, c.lon!!) else 0.0
+            }
             .take(80)
+    }
+
+    // Re-clustered per integer zoom step: the pins have a fixed size in dp, so how much ground they
+    // cover — and therefore what overlaps — changes every time the user zooms.
+    val clusters = remember(shown, zoom) {
+        val latitude = home?.latitude ?: shown.firstOrNull()?.lat ?: 52.0
+        clusterContainers(shown, CLUSTER_RADIUS_DP * Geo.metersPerDp(latitude, zoom))
     }
 
     val title = stringResource(R.string.containers_nearby)
     val noMapApp = stringResource(R.string.no_map_app)
+    val homeColor = MaterialTheme.colorScheme.primary.toArgb()
 
     val mapView = remember {
         PdokTiles.configure(context)
@@ -113,21 +147,34 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
             setTileSource(PdokTiles.source)
             setMultiTouchControls(true)
             setUseDataConnection(true)
+            isTilesScaledToDpi = true
             // Pinch-zoom only; the stock zoom buttons fade in over the detail card and look nothing
             // like the rest of the app.
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            isTilesScaledToDpi = true
-            controller.setZoom(15.0)
+            controller.setZoom(INITIAL_ZOOM.toDouble())
             home?.let { controller.setCenter(it) }
         }
     }
     MapLifecycle(mapView)
 
-    val homeColor = MaterialTheme.colorScheme.primary.toArgb()
+    DisposableEffect(mapView) {
+        val listener = object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean = false
 
-    // Rebuilt whenever the filter or the selection changes; 80 markers is small enough that a full
-    // rebuild is cheaper and less error-prone than diffing the overlay list.
-    DisposableEffect(mapView, shown, selected) {
+            override fun onZoom(event: ZoomEvent?): Boolean {
+                zoom = mapView.zoomLevelDouble.roundToInt()
+                return false
+            }
+        }
+        mapView.addMapListener(listener)
+        onDispose { mapView.removeMapListener(listener) }
+    }
+
+    // Markers are built once per cluster set. Selection is handled separately below, because
+    // rebuilding eighty overlays on every tap is what made the old version feel sluggish.
+    val markers = remember(clusters) { mutableMapOf<ContainerCluster, FastMarker>() }
+    DisposableEffect(mapView, clusters, homeColor) {
+        markers.clear()
         mapView.overlays.clear()
 
         // Added first so it is consulted last: a tap that hits no marker clears the detail card.
@@ -144,37 +191,46 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
 
         home?.let { point ->
             mapView.overlays.add(
-                Marker(mapView).apply {
+                FastMarker(mapView).apply {
                     position = point
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     icon = MarkerIcons.home(context, homeColor)
                     infoWindow = null
-                    setOnMarkerClickListener { _, _ -> true }
                 },
             )
         }
 
-        shown.forEach { c ->
-            val color = WasteTypes.style(c.wasteType).color.toArgb()
-            mapView.overlays.add(
-                Marker(mapView).apply {
-                    position = GeoPoint(c.lat!!, c.lon!!)
-                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    icon = MarkerIcons.dot(context, color, selected = c === selected)
-                    infoWindow = null
-                    relatedObject = c
-                    setOnMarkerClickListener { marker, _ ->
-                        selected = marker.relatedObject as? ContainerLocation
-                        true
-                    }
-                },
-            )
+        clusters.forEach { cluster ->
+            val marker = FastMarker(mapView).apply {
+                position = GeoPoint(cluster.latitude, cluster.longitude)
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                icon = MarkerIcons.cluster(context, cluster.colorsArgb(), cluster.size)
+                infoWindow = null
+                onTap = { selected = cluster }
+            }
+            markers[cluster] = marker
+            mapView.overlays.add(marker)
         }
-        if (shown.isNotEmpty() && home == null) {
-            mapView.controller.setCenter(GeoPoint(shown.first().lat!!, shown.first().lon!!))
+        // Zooming re-clusters, and the pin behind the open card may no longer exist afterwards.
+        if (selected != null && selected !in markers) selected = null
+        if (clusters.isNotEmpty() && home == null) {
+            mapView.controller.setCenter(GeoPoint(clusters.first().latitude, clusters.first().longitude))
         }
         mapView.invalidate()
         onDispose { }
+    }
+
+    // Swapping two cached icons and moving one overlay to the end of the list, so the selected pin
+    // draws on top of its neighbours instead of under them.
+    LaunchedEffect(selected, markers) {
+        markers.forEach { (cluster, marker) ->
+            marker.icon = MarkerIcons.cluster(context, cluster.colorsArgb(), cluster.size, cluster == selected)
+        }
+        selected?.let { markers[it] }?.let { marker ->
+            mapView.overlays.remove(marker)
+            mapView.overlays.add(marker)
+        }
+        mapView.invalidate()
     }
 
     Scaffold(
@@ -198,69 +254,105 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
 
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                MapChip(stringResource(R.string.all_types), filter.isBlank()) { filter = ""; selected = null }
+                MapChip(stringResource(R.string.all_types), filter.isBlank(), null) { filter = ""; selected = null }
                 types.forEach { t ->
-                    MapChip(data.labelFor(t), filter == t) { filter = t; selected = null }
+                    MapChip(data.labelFor(t), filter == t, WasteTypes.style(t).color) { filter = t; selected = null }
                 }
             }
 
-            Text(
-                PdokTiles.ATTRIBUTION,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = if (selected != null) 96.dp else 8.dp)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), MaterialTheme.shapes.extraSmall)
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            )
-
-            selected?.let { c ->
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                    shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(16.dp),
+            // The attribution is a licence condition, so it stays put at the bottom edge and the
+            // detail card is stacked above it rather than over it.
+            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()) {
+                AnimatedVisibility(
+                    visible = selected != null,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut(),
                 ) {
-                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        WasteIcon(c.wasteType)
-                        Column(Modifier.weight(1f)) {
-                            Text(data.labelFor(c.wasteType), style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                listOf(c.address, c.city).filter { it.isNotBlank() }.joinToString(", "),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        FilledTonalIconButton(onClick = {
-                            val uri = "geo:${c.latitude},${c.longitude}?q=${c.latitude},${c.longitude}(${android.net.Uri.encode(c.address)})".toUri()
-                            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
-                        }) {
-                            Icon(Icons.Outlined.Directions, contentDescription = stringResource(R.string.open_in_maps))
-                        }
-                    }
+                    ClusterCard(data, selected, onDirections = { cluster ->
+                        val uri = "geo:${cluster.latitude},${cluster.longitude}" +
+                            "?q=${cluster.latitude},${cluster.longitude}" +
+                            "(${android.net.Uri.encode(cluster.label(data))})"
+                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, uri.toUri())) }
+                    })
                 }
+                Text(
+                    PdokTiles.ATTRIBUTION,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), MaterialTheme.shapes.extraSmall)
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
+                )
             }
         }
     }
 }
 
-/** Opaque and slightly raised: these float over map tiles, so the default translucency reads badly. */
+/**
+ * Detail for the tapped pin. Takes a nullable cluster and holds the last non-null one so the exit
+ * animation still has something to draw while it slides away.
+ */
 @Composable
-private fun MapChip(label: String, checked: Boolean, onClick: () -> Unit) {
+private fun ClusterCard(data: CureData, cluster: ContainerCluster?, onDirections: (ContainerCluster) -> Unit) {
+    var last by remember { mutableStateOf(cluster) }
+    if (cluster != null) last = cluster
+    val shownCluster = cluster ?: last ?: return
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                shownCluster.types.take(3).forEach { WasteIcon(it, size = 36.dp) }
+            }
+            Column(Modifier.weight(1f)) {
+                Text(shownCluster.label(data), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    shownCluster.sharedAddress ?: stringResource(R.string.containers_here, shownCluster.size),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FilledTonalIconButton(onClick = { onDirections(shownCluster) }) {
+                Icon(Icons.Outlined.Directions, contentDescription = stringResource(R.string.open_in_maps))
+            }
+        }
+    }
+}
+
+/** Filter chips double as the map legend, so each one is outlined in its stream's pin colour. */
+@Composable
+private fun MapChip(label: String, checked: Boolean, color: Color?, onClick: () -> Unit) {
     FilterChip(
         selected = checked,
         onClick = onClick,
         label = { Text(label, maxLines = 1) },
         elevation = FilterChipDefaults.filterChipElevation(elevation = 3.dp),
+        border = color?.let { BorderStroke(if (checked) 2.dp else 1.5.dp, it) },
         colors = FilterChipDefaults.filterChipColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            // Blended rather than alpha-tinted: these sit over map tiles, and a translucent
+            // container lets streets through and washes the label out.
+            selectedContainerColor = color
+                ?.let { lerp(MaterialTheme.colorScheme.surface, it, 0.30f) }
+                ?: MaterialTheme.colorScheme.secondaryContainer,
+            selectedLabelColor = MaterialTheme.colorScheme.onSurface,
         ),
     )
 }
+
+/** A cluster's streams, in the fixed order the pin's wedges are drawn. */
+private fun ContainerCluster.colorsArgb(): List<Int> =
+    types.map { WasteTypes.style(it).color.toArgb() }
+
+/** "Glass" for one stream, "Glass · Household waste" for several. */
+private fun ContainerCluster.label(data: CureData): String =
+    types.joinToString(" · ") { data.labelFor(it) }
 
 /** osmdroid's MapView keeps its own tile threads; they have to follow the host lifecycle. */
 @Composable

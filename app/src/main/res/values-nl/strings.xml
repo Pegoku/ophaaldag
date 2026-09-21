@@ -89,6 +89,7 @@
     <string name="containers_open_all">Alles op de kaart tonen</string>
     <string name="containers_export_count">%1$d in de buurt, gekleurd per afvalsoort</string>
     <string name="no_map_app">Geen app op deze telefoon kan een kaartbestand openen.</string>
+    <string name="containers_here">%1$d containers hier</string>
     <string name="containers_export_kml">Exporteren als KML</string>
     <string name="source_code">Broncode</string>
 
