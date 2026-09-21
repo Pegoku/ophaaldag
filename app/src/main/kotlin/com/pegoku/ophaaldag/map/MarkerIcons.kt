@@ -22,12 +22,16 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 
 /** Flat colour-coded dots, drawn once per variant and reused across every marker of that stream. */
 object MarkerIcons {
+
+    /** Material's on-surface dark, for the count drawn on the white centre. */
+    private val LABEL_COLOR = 0xFF1C1B1F.toInt()
 
     private val cache = HashMap<String, Drawable>()
 
@@ -51,6 +55,46 @@ object MarkerIcons {
             }
             BitmapDrawable(context.resources, bitmap)
         }
+
+    /**
+     * A pin standing for several containers at one spot: a ring split into one wedge per waste
+     * stream present, with the count in the middle. Reading the colours tells you what is there
+     * without tapping.
+     */
+    fun cluster(context: Context, colorsArgb: List<Int>, count: Int, selected: Boolean = false): Drawable {
+        if (count <= 1) return dot(context, colorsArgb.firstOrNull() ?: Color.GRAY, selected)
+        return cache.getOrPut("cluster-${colorsArgb.joinToString("-")}-$count-$selected") {
+            val size = dp(context, if (selected) 38f else 32f)
+            val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            val c = size / 2f
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+            paint.color = Color.WHITE
+            canvas.drawCircle(c, c, c, paint)
+
+            val inset = dp(context, 2f).toFloat()
+            val box = RectF(inset, inset, size - inset, size - inset)
+            val sweep = 360f / colorsArgb.size
+            colorsArgb.forEachIndexed { index, color ->
+                paint.color = color
+                // -90 so the first wedge starts at the top; a hair of overlap hides seam artefacts.
+                canvas.drawArc(box, -90f + index * sweep, sweep + 0.5f, true, paint)
+            }
+
+            paint.color = Color.WHITE
+            canvas.drawCircle(c, c, c - dp(context, if (selected) 8f else 7f), paint)
+
+            paint.color = LABEL_COLOR
+            paint.textAlign = Paint.Align.CENTER
+            paint.isFakeBoldText = true
+            paint.textSize = dp(context, if (selected) 14f else 12f).toFloat()
+            val baseline = c - (paint.descent() + paint.ascent()) / 2f
+            canvas.drawText(count.toString(), c, baseline, paint)
+
+            BitmapDrawable(context.resources, bitmap)
+        }
+    }
 
     /** The user's own address: a hollow ring, so it never reads as another container. */
     fun home(context: Context, colorArgb: Int): Drawable =

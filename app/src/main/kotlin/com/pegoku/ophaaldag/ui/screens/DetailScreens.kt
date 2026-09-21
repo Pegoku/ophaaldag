@@ -81,13 +81,10 @@ import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import com.pegoku.ophaaldag.ui.components.HtmlText
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.util.Dates
+import com.pegoku.ophaaldag.util.Geo
 import com.pegoku.ophaaldag.util.MapPlace
 import java.time.LocalDate
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.roundToInt
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 @Composable
 fun WasteDetailScreen(data: CureData, type: String, onBack: () -> Unit) {
@@ -244,7 +241,7 @@ fun ContainersScreen(data: CureData, onBack: () -> Unit, onOpenMap: (String) -> 
     val sorted = remember(data, filter) {
         data.containers
             .filter { filter.isBlank() || it.wasteType == filter }
-            .map { c -> c to (if (lat != null && lon != null) distanceMeters(lat, lon, c.lat!!, c.lon!!) else Double.NaN) }
+            .map { c -> c to (if (lat != null && lon != null) Geo.distanceMeters(lat, lon, c.lat!!, c.lon!!) else Double.NaN) }
             .sortedBy { if (it.second.isNaN()) Double.MAX_VALUE else it.second }
             .take(80)
     }
@@ -333,11 +330,4 @@ private fun ContainerRow(data: CureData, c: ContainerLocation, dist: Double, onC
     )
 }
 
-internal fun distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val r = 6371000.0
-    val dLat = Math.toRadians(lat2 - lat1)
-    val dLon = Math.toRadians(lon2 - lon1)
-    val a = sin(dLat / 2) * sin(dLat / 2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2)
-    return 2 * r * atan2(sqrt(a), sqrt(1 - a))
-}
 
