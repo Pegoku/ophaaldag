@@ -21,8 +21,8 @@ import com.pegoku.ophaaldag.data.ContainerLocation
 import com.pegoku.ophaaldag.util.Geo
 
 /**
- * One map pin. Cure puts several containers at the same address — four household waste plus a
- * glass bank on one square is normal — so at anything but the closest zoom they are drawn as a
+ * One map pin. Cure puts several containers at the same address (four household waste plus a
+ * glass bank on one square is normal), so at anything but the closest zoom they are drawn as a
  * single marker that names every stream underneath it.
  */
 data class ContainerCluster(

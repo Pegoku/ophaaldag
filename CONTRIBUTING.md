@@ -30,7 +30,7 @@ left unsigned.
   (`fix address race`, `add container filter chips`) with no trailing period.
 - `./gradlew :app:lintRelease :app:testDebugUnitTest` must pass; CI runs the same commands.
 - Add or update unit tests when you change parsing, date handling, clustering or export
-  logic — those all have test coverage in `app/src/test/`.
+  logic; those all have test coverage in `app/src/test/`.
 - UI changes: please attach a screenshot, in both light and dark theme when relevant.
 - User-visible strings go in `app/src/main/res/values/strings.xml` and
   `values-nl/strings.xml`. Never hardcode a string in a composable.
@@ -43,7 +43,7 @@ to `values-<code>/strings.xml`, translate the values, and add the code to
 
 ## The upstream API
 
-The backend is not ours — it is AddComm's MijnAfvalwijzer platform, documented in
+The backend is not ours. It is AddComm's MijnAfvalwijzer platform, documented in
 [docs/API.md](docs/API.md) from reverse engineering the official app. Please be considerate
 with it: no scraping loops, no load testing, and keep any live checks to a handful of
 requests. The app caches aggressively for the same reason.
@@ -51,4 +51,4 @@ requests. The app caches aggressively for the same reason.
 ## Reporting a bug
 
 Include your Android version, the device, the app version (Settings → About) and, when the
-problem is address-specific, the municipality — not your full address.
+problem is address-specific, the municipality rather than your full address.

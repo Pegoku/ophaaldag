@@ -28,7 +28,7 @@ import java.io.File
  *
  * Deliberately *not* OpenStreetMap's own tile server: its tile usage policy rules out apps
  * distributed at any scale. These come from PDOK, the Dutch government's open geo service run by
- * the Kadaster — no API key, no registration, no quota, and open data under CC BY 4.0. Coverage is
+ * the Kadaster: no API key, no registration, no quota, and open data under CC BY 4.0. Coverage is
  * the Netherlands only, which is exactly Cure's service area. Attribution is shown on the map.
  */
 object PdokTiles {

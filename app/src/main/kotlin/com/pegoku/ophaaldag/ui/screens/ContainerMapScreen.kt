@@ -130,7 +130,7 @@ fun ContainerMapScreen(data: CureData, initialFilter: String, onBack: () -> Unit
     }
 
     // Re-clustered per integer zoom step: the pins have a fixed size in dp, so how much ground they
-    // cover — and therefore what overlaps — changes every time the user zooms.
+    // cover, and therefore what overlaps, changes every time the user zooms.
     val clusters = remember(shown, zoom) {
         val latitude = home?.latitude ?: shown.firstOrNull()?.lat ?: 52.0
         clusterContainers(shown, CLUSTER_RADIUS_DP * Geo.metersPerDp(latitude, zoom))

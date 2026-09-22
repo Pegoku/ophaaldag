@@ -25,7 +25,7 @@ import org.osmdroid.views.overlay.Marker
  * A [Marker] that reacts on tap-up instead of on confirmed-single-tap.
  *
  * osmdroid's stock Marker hit-tests in `onSingleTapConfirmed`, which the gesture detector only
- * fires once the double-tap window has elapsed — a very noticeable ~300 ms of nothing happening
+ * fires once the double-tap window has elapsed: a very noticeable ~300 ms of nothing happening
  * after your finger lifts. Hit-testing in `onSingleTapUp` makes selection feel immediate. The cost
  * is that double-tap-to-zoom centred exactly on a marker also selects it, which is harmless here.
  */

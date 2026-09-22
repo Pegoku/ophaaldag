@@ -111,7 +111,7 @@ fun WasteFilterChip(
         label = { Text(label, maxLines = 1) },
         modifier = modifier,
         elevation = FilterChipDefaults.filterChipElevation(elevation = elevation),
-        // The "all types" chip has no stream colour, so it falls back to the neutral outline —
+        // The "all types" chip has no stream colour, so it falls back to the neutral outline;
         // without a border it vanishes into a dark background.
         border = BorderStroke(
             width = if (selected) 2.dp else 1.5.dp,

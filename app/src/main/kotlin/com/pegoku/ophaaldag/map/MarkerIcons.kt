@@ -39,7 +39,7 @@ object MarkerIcons {
      *
      * osmdroid hit-tests a marker against its icon bounds, so the padding is the touch target: an
      * 18 dp dot on its own is well under the 48 dp minimum and is genuinely fiddly to hit. The
-     * artwork is unchanged — only the reachable area grows.
+     * artwork is unchanged; only the reachable area grows.
      */
     private const val MIN_TOUCH_DP = 44f
 
