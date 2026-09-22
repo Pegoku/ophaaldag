@@ -119,6 +119,7 @@
     <string name="reminder_when">When</string>
     <string name="evening_before">Evening before</string>
     <string name="morning_of">Morning of the pickup</string>
+    <string name="morning_of_short">Morning of</string>
     <string name="reminder_time">Time</string>
     <string name="reminder_types">Waste types</string>
     <string name="reminder_types_all">All types</string>

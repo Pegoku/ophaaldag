@@ -112,6 +112,7 @@
     <string name="reminder_when">Wanneer</string>
     <string name="evening_before">Avond ervoor</string>
     <string name="morning_of">Ochtend van de ophaaldag</string>
+    <string name="morning_of_short">Ochtend zelf</string>
     <string name="reminder_time">Tijd</string>
     <string name="reminder_types">Afvalsoorten</string>
     <string name="reminder_types_all">Alle soorten</string>

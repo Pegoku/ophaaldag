@@ -438,7 +438,7 @@ private fun ReminderTimeDialog(title: String, default: ReminderTime, current: Re
                             Text(stringResource(R.string.evening_before), maxLines = 1)
                         }
                         ToggleButton(checked = !dayBefore, onCheckedChange = { dayBefore = false }, modifier = Modifier.weight(1f)) {
-                            Text(stringResource(R.string.morning_of), maxLines = 1)
+                            Text(stringResource(R.string.morning_of_short), maxLines = 1)
                         }
                     }
                     Spacer(Modifier.height(8.dp))
