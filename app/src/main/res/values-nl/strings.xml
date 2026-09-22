@@ -112,14 +112,9 @@
     <string name="reminder_when">Wanneer</string>
     <string name="evening_before">Avond ervoor</string>
     <string name="morning_of">Ochtend van de ophaaldag</string>
-    <string name="morning_of_short">Ochtend zelf</string>
     <string name="reminder_time">Tijd</string>
     <string name="reminder_types">Afvalsoorten</string>
     <string name="reminder_types_all">Alle soorten</string>
-    <string name="reminder_per_type">Tijd per afvalsoort</string>
-    <string name="reminder_default_time">Standaardtijd</string>
-    <string name="reminder_use_default">Standaardtijd gebruiken</string>
-    <string name="reminder_time_summary">%1$s om %2$s</string>
     <string name="reminder_alarm_style">Herinnering als alarm</string>
     <string name="reminder_alarm_style_desc">Gebruikt het alarmvolume en blijft klinken tot je de melding wegveegt</string>
     <string name="schedule_changes">Kalenderwijzigingen</string>

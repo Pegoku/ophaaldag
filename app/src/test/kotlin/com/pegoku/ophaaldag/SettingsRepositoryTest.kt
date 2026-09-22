@@ -1,7 +1,6 @@
 package com.pegoku.ophaaldag
 
 import com.pegoku.ophaaldag.data.ReminderSettings
-import com.pegoku.ophaaldag.data.ReminderTime
 import com.pegoku.ophaaldag.data.SettingsRepository
 import com.pegoku.ophaaldag.data.UserSettings
 import kotlinx.coroutines.runBlocking
@@ -34,7 +33,7 @@ class SettingsRepositoryTest {
     fun reminderSettingsRoundTripThroughDataStore() = runBlocking {
         val r = ReminderSettings(
             enabled = true, dayBefore = false, hour = 6, minute = 45, types = setOf("gft"),
-            overrides = mapOf("papier" to ReminderTime(true, 20, 15)), alarmStyle = true, dateChanges = false,
+            alarmStyle = true, dateChanges = false,
         )
         repo.setReminders(r)
         assertEquals(r, repo.current().reminders)

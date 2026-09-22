@@ -35,16 +35,6 @@ import java.util.Locale
 
 val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-/** One reminder moment relative to a pickup: the evening before or the morning of, at [hour]:[minute]. */
-data class ReminderTime(
-    /** true = evening before the pickup, false = morning of the pickup. */
-    val dayBefore: Boolean = true,
-    val hour: Int = 19,
-    val minute: Int = 0,
-) {
-    val clock: String get() = "%02d:%02d".format(hour, minute)
-}
-
 data class ReminderSettings(
     val enabled: Boolean = false,
     /** true = evening before the pickup, false = morning of the pickup. */
@@ -53,34 +43,13 @@ data class ReminderSettings(
     val minute: Int = 0,
     /** Empty = all waste types. */
     val types: Set<String> = emptySet(),
-    /** Waste types that fire at their own moment instead of the default one. */
-    val overrides: Map<String, ReminderTime> = emptyMap(),
     /** Alarm-style: alarm volume, keeps sounding until dismissed. */
     val alarmStyle: Boolean = false,
     /** Notify when a refresh shows Cure moved, cancelled or added a pickup date. */
     val dateChanges: Boolean = true,
 ) {
-    val default: ReminderTime get() = ReminderTime(dayBefore, hour, minute)
-
     fun includes(type: String): Boolean = types.isEmpty() || type in types
 
-    fun timeFor(type: String): ReminderTime = overrides[type] ?: default
-
-    companion object {
-        /** `type|1|19|00`; the type comes first so a stray `|` in a type name still parses from the right. */
-        fun encodeOverride(type: String, time: ReminderTime): String = "$type|${if (time.dayBefore) 1 else 0}|${time.hour}|${time.minute}"
-
-        fun decodeOverride(raw: String): Pair<String, ReminderTime>? {
-            val i3 = raw.lastIndexOf('|'); if (i3 <= 0) return null
-            val i2 = raw.lastIndexOf('|', i3 - 1); if (i2 <= 0) return null
-            val i1 = raw.lastIndexOf('|', i2 - 1); if (i1 <= 0) return null
-            val type = raw.substring(0, i1)
-            val dayBefore = raw.substring(i1 + 1, i2) == "1"
-            val hour = raw.substring(i2 + 1, i3).toIntOrNull()?.takeIf { it in 0..23 } ?: return null
-            val minute = raw.substring(i3 + 1).toIntOrNull()?.takeIf { it in 0..59 } ?: return null
-            return type to ReminderTime(dayBefore, hour, minute)
-        }
-    }
 }
 
 data class UserSettings(
@@ -124,7 +93,6 @@ class SettingsRepository(private val context: Context) {
         val remHour = intPreferencesKey("rem_hour")
         val remMinute = intPreferencesKey("rem_minute")
         val remTypes = stringSetPreferencesKey("rem_types")
-        val remOverrides = stringSetPreferencesKey("rem_overrides")
         val remAlarmStyle = booleanPreferencesKey("rem_alarm_style")
         val remDateChanges = booleanPreferencesKey("rem_date_changes")
         val remDone = stringSetPreferencesKey("rem_done")
@@ -154,7 +122,6 @@ class SettingsRepository(private val context: Context) {
                 hour = this[Keys.remHour] ?: 19,
                 minute = this[Keys.remMinute] ?: 0,
                 types = this[Keys.remTypes] ?: emptySet(),
-                overrides = (this[Keys.remOverrides] ?: emptySet()).mapNotNull(ReminderSettings::decodeOverride).toMap(),
                 alarmStyle = this[Keys.remAlarmStyle] ?: false,
                 dateChanges = this[Keys.remDateChanges] ?: true,
             ),
@@ -197,7 +164,6 @@ class SettingsRepository(private val context: Context) {
             p[Keys.remHour] = r.hour
             p[Keys.remMinute] = r.minute
             p[Keys.remTypes] = r.types
-            p[Keys.remOverrides] = r.overrides.map { (type, time) -> ReminderSettings.encodeOverride(type, time) }.toSet()
             p[Keys.remAlarmStyle] = r.alarmStyle
             p[Keys.remDateChanges] = r.dateChanges
         }

@@ -32,10 +32,9 @@ import java.time.ZoneId
 /**
  * Local replacement for the server-side push reminders of the official app.
  *
- * Every waste type has its own reminder moment (the global default unless overridden), so one
- * pickup day can produce several alarms: paper the evening before, GFT the same morning. Only the
- * next moment is armed; the receiver re-arms after each one. Pickups the user marked as done are
- * skipped, and a snoozed reminder lives on its own alarm so it survives a reschedule.
+ * Schedules a single alarm for the next reminder moment; the receiver re-arms it. Pickups the user
+ * marked as done are skipped, and a snoozed reminder lives on its own alarm so it survives a
+ * reschedule.
  */
 object ReminderScheduler {
     const val ACTION_FIRE = "com.pegoku.ophaaldag.REMINDER"
@@ -65,7 +64,7 @@ object ReminderScheduler {
         if (!r.enabled) return emptyList()
         return data.pickups
             .filter { r.includes(it.type) && !settings.isDone(it.date, it.type) }
-            .mapNotNull { p -> p.localDate?.let { Triple(fireAt(it, r.timeFor(p.type)), it, p) } }
+            .mapNotNull { p -> p.localDate?.let { Triple(fireAt(it, r), it, p) } }
             .groupBy { it.first to it.second }
             .map { (key, group) -> Planned(key.first, key.second, group.map { it.third }) }
             .sortedBy { it.fireAt }
@@ -74,8 +73,8 @@ object ReminderScheduler {
     fun nextReminder(data: CureData, settings: UserSettings, now: LocalDateTime = LocalDateTime.now()): Planned? =
         plan(data, settings).firstOrNull { it.fireAt.isAfter(now) }
 
-    private fun fireAt(pickup: LocalDate, time: com.pegoku.ophaaldag.data.ReminderTime): LocalDateTime =
-        (if (time.dayBefore) pickup.minusDays(1) else pickup).atTime(time.hour, time.minute)
+    private fun fireAt(pickup: LocalDate, r: ReminderSettings): LocalDateTime =
+        (if (r.dayBefore) pickup.minusDays(1) else pickup).atTime(r.hour, r.minute)
 
     fun reschedule(context: Context, data: CureData?, settings: UserSettings) {
         val am = context.getSystemService(AlarmManager::class.java)

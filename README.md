@@ -15,7 +15,7 @@ Not affiliated with Cure Afvalbeheer or AddComm.
 - Waste guide: separation info per stream plus a searchable "Afval-ABC" of ~1,900 household items
 - Announcements, service-message history and municipality tips/contact pages
 - Nearby public containers (glass, paper, textile, residual) sorted by distance, opens in Maps
-- Local reminders with their own time per waste stream (paper the evening before, GFT the same morning), "Done" and "Snooze" actions, and an opt-in alarm-style mode; no push registration needed
+- Local reminders (evening before or morning of) per waste stream with "Done" and "Snooze" actions and an opt-in alarm-style mode; no push registration needed
 - Schedule-change alerts: when Cure moves, cancels or adds a pickup date, the app tells you which one
 - Home-screen widget with the next pickups
 - Offline: the last document is cached and shown instantly; pull to refresh

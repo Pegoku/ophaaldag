@@ -119,14 +119,9 @@
     <string name="reminder_when">When</string>
     <string name="evening_before">Evening before</string>
     <string name="morning_of">Morning of the pickup</string>
-    <string name="morning_of_short">Morning of</string>
     <string name="reminder_time">Time</string>
     <string name="reminder_types">Waste types</string>
     <string name="reminder_types_all">All types</string>
-    <string name="reminder_per_type">Time per waste type</string>
-    <string name="reminder_default_time">Default time</string>
-    <string name="reminder_use_default">Use the default time</string>
-    <string name="reminder_time_summary">%1$s at %2$s</string>
     <string name="reminder_alarm_style">Alarm-style reminders</string>
     <string name="reminder_alarm_style_desc">Uses the alarm volume and keeps sounding until you dismiss it</string>
     <string name="schedule_changes">Schedule changes</string>
