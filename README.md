@@ -2,7 +2,6 @@
 
 [![Android CI](https://github.com/Pegoku/ophaaldag/actions/workflows/android.yml/badge.svg)](https://github.com/Pegoku/ophaaldag/actions/workflows/android.yml)
 [![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
-[![Latest release](https://img.shields.io/github/v/release/Pegoku/ophaaldag)](https://github.com/Pegoku/ophaaldag/releases/latest)
 
 A community-made, Material 3 Expressive Android client for the **Cure Afvalbeheer** waste
 calendar (Eindhoven, Geldrop-Mierlo, Valkenswaard). It talks to the same public web service
@@ -35,8 +34,9 @@ Dark theme:
 
 ## Install
 
-Download the APK from the [latest release](https://github.com/Pegoku/ophaaldag/releases/latest),
-or build it yourself (see below). Requires Android 8.0 (API 26) or newer.
+Download the APK from the [releases page](https://github.com/Pegoku/ophaaldag/releases), or
+build it yourself (see below). Requires Android 8.0 (API 26) or newer. Everything published
+so far is marked as a pre-release.
 
 ## App icon
 
