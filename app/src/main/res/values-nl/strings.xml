@@ -12,6 +12,15 @@
     <string name="reminder_snooze">1 uur uitstellen</string>
     <string name="channel_alarm">Herinneringen als alarm</string>
     <string name="channel_alarm_desc">Ophaalherinneringen op het alarmvolume die blijven klinken tot je ze wegveegt.</string>
+    <string name="channel_schedule">Kalenderwijzigingen</string>
+    <string name="channel_schedule_desc">Cure heeft een ophaaldag verplaatst, laten vervallen of toegevoegd.</string>
+    <plurals name="schedule_change_title">
+        <item quantity="one">Ophaaldag gewijzigd</item>
+        <item quantity="other">%d ophaaldagen gewijzigd</item>
+    </plurals>
+    <string name="change_moved">%1$s verplaatst van %2$s naar %3$s</string>
+    <string name="change_cancelled">%1$s op %2$s vervalt</string>
+    <string name="change_added">Extra ophaaldag: %1$s op %2$s</string>
 
     <string name="today">Vandaag</string>
     <string name="tomorrow">Morgen</string>

@@ -49,7 +49,8 @@ class CureRepository(
     private val context: Context,
     val settings: SettingsRepository,
     private val api: CureApi = CureApi(),
-    private val onDataChanged: suspend (CureData?) -> Unit = {},
+    /** Called with the document that was replaced (null on the first load) and the new one. */
+    private val onDataChanged: suspend (previous: CureData?, data: CureData?) -> Unit = { _, _ -> },
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val cacheFile get() = File(context.filesDir, "postcodecheck.json")
@@ -89,7 +90,7 @@ class CureRepository(
             val parsed = CureParser.parse(raw)
             withContext(Dispatchers.IO) { cacheFile.writeText(raw) }
             _state.update { it.copy(data = parsed, loading = false, error = null) }
-            onDataChanged(parsed)
+            onDataChanged(current, parsed)
             Result.success(parsed)
         } catch (e: CancellationException) {
             _state.update { it.copy(loading = false) }
@@ -117,7 +118,7 @@ class CureRepository(
         settings.setAddress(null)
         withContext(Dispatchers.IO) { cacheFile.delete() }
         _state.update { DataState(cacheLoaded = true) }
-        onDataChanged(null)
+        onDataChanged(null, null)
     }
 
     fun upcoming(from: LocalDate = LocalDate.now(), limit: Int = Int.MAX_VALUE): List<PickupDay> =

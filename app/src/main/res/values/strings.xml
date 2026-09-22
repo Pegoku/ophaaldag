@@ -12,6 +12,15 @@
     <string name="reminder_snooze">Snooze 1 hour</string>
     <string name="channel_alarm">Alarm-style reminders</string>
     <string name="channel_alarm_desc">Pickup reminders that use the alarm volume and keep sounding until dismissed.</string>
+    <string name="channel_schedule">Schedule changes</string>
+    <string name="channel_schedule_desc">Cure moved, cancelled or added a pickup date.</string>
+    <plurals name="schedule_change_title">
+        <item quantity="one">Pickup date changed</item>
+        <item quantity="other">%d pickup dates changed</item>
+    </plurals>
+    <string name="change_moved">%1$s moved from %2$s to %3$s</string>
+    <string name="change_cancelled">%1$s on %2$s is cancelled</string>
+    <string name="change_added">Extra pickup: %1$s on %2$s</string>
 
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>

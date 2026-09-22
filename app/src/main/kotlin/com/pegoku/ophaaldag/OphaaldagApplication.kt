@@ -28,18 +28,22 @@ import com.pegoku.ophaaldag.calendar.CalendarSync
 import com.pegoku.ophaaldag.data.CureRepository
 import com.pegoku.ophaaldag.data.SettingsRepository
 import com.pegoku.ophaaldag.reminders.ReminderScheduler
+import com.pegoku.ophaaldag.sync.ScheduleChanges
 import com.pegoku.ophaaldag.sync.SyncWorker
 import com.pegoku.ophaaldag.widget.PickupWidget
 
 class OphaaldagApplication : Application() {
     val settings: SettingsRepository by lazy { SettingsRepository(this) }
     val repository: CureRepository by lazy {
-        CureRepository(this, settings, onDataChanged = { data ->
+        CureRepository(this, settings, onDataChanged = { previous, data ->
             val current = settings.current()
             ReminderScheduler.reschedule(this, data, current)
             runCatching { PickupWidget().updateAll(this) }
             if (data != null) {
                 runCatching { SyncWorker.notifyNewServiceMessages(this, settings, data) }
+                if (previous != null && current.reminders.dateChanges) {
+                    runCatching { ScheduleChanges.notify(this, previous, data) }
+                }
                 current.calendarId?.let { id -> runCatching { CalendarSync.sync(this, id, data, current.reminders) } }
             }
         })
@@ -79,6 +83,13 @@ class OphaaldagApplication : Application() {
         )
         nm.createNotificationChannel(
             NotificationChannel(
+                CHANNEL_SCHEDULE,
+                getString(R.string.channel_schedule),
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ).apply { description = getString(R.string.channel_schedule_desc) },
+        )
+        nm.createNotificationChannel(
+            NotificationChannel(
                 CHANNEL_SERVICE,
                 getString(R.string.channel_service),
                 NotificationManager.IMPORTANCE_DEFAULT,
@@ -90,6 +101,7 @@ class OphaaldagApplication : Application() {
         const val CHANNEL_REMINDERS = "reminders"
         const val CHANNEL_SERVICE = "service"
         const val CHANNEL_ALARM = "reminders_alarm"
+        const val CHANNEL_SCHEDULE = "schedule"
         fun from(context: Context): OphaaldagApplication = context.applicationContext as OphaaldagApplication
     }
 }
