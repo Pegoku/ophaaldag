@@ -51,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.ToggleButton
@@ -71,6 +72,7 @@ import com.pegoku.ophaaldag.calendar.CalendarSync
 import com.pegoku.ophaaldag.calendar.DeviceCalendar
 import com.pegoku.ophaaldag.data.CureData
 import com.pegoku.ophaaldag.data.ReminderSettings
+import com.pegoku.ophaaldag.data.ReminderTime
 import com.pegoku.ophaaldag.data.UserSettings
 import com.pegoku.ophaaldag.reminders.ReminderScheduler
 import com.pegoku.ophaaldag.ui.AppViewModel
@@ -86,6 +88,7 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
     val context = LocalContext.current
     val reminders = settings.reminders
     var showTimePicker by remember { mutableStateOf(false) }
+    var editingType by remember { mutableStateOf<String?>(null) }
     var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         notificationsEnabled = granted
@@ -210,7 +213,31 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
                             )
                         }
                     }
-                    val planned = remember(reminders, data) { ReminderScheduler.nextReminder(data, reminders) }
+                    val covered = types.filter { reminders.includes(it) }
+                    if (covered.size > 1) {
+                        Text(stringResource(R.string.reminder_per_type), style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 16.dp, top = 4.dp))
+                        covered.forEach { t ->
+                            val override = reminders.overrides[t]
+                            ListItem(
+                                headlineContent = { Text(data.labelFor(t)) },
+                                supportingContent = {
+                                    Text(override?.let { reminderTimeSummary(it) } ?: stringResource(R.string.reminder_default_time))
+                                },
+                                leadingContent = { WasteIcon(t, size = 32.dp) },
+                                trailingContent = override?.let { { Text(it.clock, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary) } },
+                                colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                                modifier = Modifier.clickable { editingType = t },
+                            )
+                        }
+                    }
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.reminder_alarm_style)) },
+                        supportingContent = { Text(stringResource(R.string.reminder_alarm_style_desc)) },
+                        trailingContent = { Switch(checked = reminders.alarmStyle, onCheckedChange = { on -> update { copy(alarmStyle = on) } }) },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                        modifier = Modifier.clickable { update { copy(alarmStyle = !alarmStyle) } },
+                    )
+                    val planned = remember(settings, data) { ReminderScheduler.nextReminder(data, settings) }
                     Text(
                         planned?.let {
                             stringResource(R.string.next_reminder, it.fireAt.format(DateTimeFormatter.ofPattern("EEE d MMM HH:mm", Locale.getDefault())))
@@ -220,6 +247,23 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.schedule_changes)) },
+                    supportingContent = { Text(stringResource(R.string.schedule_changes_desc)) },
+                    trailingContent = {
+                        Switch(
+                            checked = reminders.dateChanges,
+                            onCheckedChange = { on ->
+                                if (on && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !notificationsEnabled) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                update { copy(dateChanges = on) }
+                            },
+                        )
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.clickable { update { copy(dateChanges = !dateChanges) } },
+                )
             }
 
             SectionTitle(stringResource(R.string.calendar), modifier = Modifier.padding(top = 12.dp))
@@ -305,6 +349,19 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
         }
     }
 
+    editingType?.let { type ->
+        ReminderTimeDialog(
+            title = data.labelFor(type),
+            default = reminders.default,
+            current = reminders.overrides[type],
+            onDismiss = { editingType = null },
+            onSave = { time ->
+                update { copy(overrides = if (time == null) overrides - type else overrides + (type to time)) }
+                editingType = null
+            },
+        )
+    }
+
     if (showCalendarDisclosure) {
         AlertDialog(
             onDismissRequest = { showCalendarDisclosure = false },
@@ -345,3 +402,53 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
     }
 }
 
+
+@Composable
+private fun reminderTimeSummary(time: ReminderTime): String =
+    stringResource(R.string.reminder_time_summary, stringResource(if (time.dayBefore) R.string.evening_before else R.string.morning_of), time.clock)
+
+/**
+ * Picks the reminder moment for one waste type. Saving with the default switch on clears the
+ * override, so the type follows the global time again.
+ */
+@Composable
+private fun ReminderTimeDialog(title: String, default: ReminderTime, current: ReminderTime?, onDismiss: () -> Unit, onSave: (ReminderTime?) -> Unit) {
+    var useDefault by remember { mutableStateOf(current == null) }
+    var dayBefore by remember { mutableStateOf((current ?: default).dayBefore) }
+    val initial = current ?: default
+    val state = rememberTimePickerState(initialHour = initial.hour, initialMinute = initial.minute, is24Hour = true)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.reminder_use_default)) },
+                    supportingContent = { Text(reminderTimeSummary(default)) },
+                    trailingContent = { Switch(checked = useDefault, onCheckedChange = { useDefault = it }) },
+                    colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                    modifier = Modifier.clickable { useDefault = !useDefault },
+                )
+                if (!useDefault) {
+                    Row(
+                        Modifier.padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+                    ) {
+                        ToggleButton(checked = dayBefore, onCheckedChange = { dayBefore = true }, modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.evening_before), maxLines = 1)
+                        }
+                        ToggleButton(checked = !dayBefore, onCheckedChange = { dayBefore = false }, modifier = Modifier.weight(1f)) {
+                            Text(stringResource(R.string.morning_of), maxLines = 1)
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    TimeInput(state = state)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(if (useDefault) null else ReminderTime(dayBefore, state.hour, state.minute)) }) { Text(stringResource(R.string.ok)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
+}

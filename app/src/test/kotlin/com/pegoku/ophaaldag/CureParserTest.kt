@@ -19,6 +19,7 @@ package com.pegoku.ophaaldag
 
 import com.pegoku.ophaaldag.data.CureParser
 import com.pegoku.ophaaldag.data.ReminderSettings
+import com.pegoku.ophaaldag.data.UserSettings
 import com.pegoku.ophaaldag.reminders.ReminderScheduler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -80,7 +81,7 @@ class CureParserTest {
 
     @Test
     fun reminderPlanningPicksEveningBefore() {
-        val settings = ReminderSettings(enabled = true, dayBefore = true, hour = 19, minute = 0)
+        val settings = UserSettings(reminders = ReminderSettings(enabled = true, dayBefore = true, hour = 19, minute = 0))
         val planned = ReminderScheduler.nextReminder(data, settings, now = LocalDateTime.of(2026, 9, 19, 12, 0))
         assertNotNull(planned)
         // Next pickup after 19 Sep 12:00 is restafval on 23 Sep -> remind on 22 Sep 19:00.
@@ -91,9 +92,9 @@ class CureParserTest {
     @Test
     fun reminderRespectsTypeFilterAndDisabled() {
         val onlyPaper = ReminderSettings(enabled = true, dayBefore = false, hour = 7, minute = 30, types = setOf("papier"))
-        val planned = ReminderScheduler.nextReminder(data, onlyPaper, now = LocalDateTime.of(2026, 9, 19, 12, 0))
+        val planned = ReminderScheduler.nextReminder(data, UserSettings(reminders = onlyPaper), now = LocalDateTime.of(2026, 9, 19, 12, 0))
         assertEquals(LocalDate.of(2026, 9, 25), planned!!.pickupDate)
         assertEquals(LocalDateTime.of(2026, 9, 25, 7, 30), planned.fireAt)
-        assertNull(ReminderScheduler.nextReminder(data, onlyPaper.copy(enabled = false)))
+        assertNull(ReminderScheduler.nextReminder(data, UserSettings(reminders = onlyPaper.copy(enabled = false))))
     }
 }

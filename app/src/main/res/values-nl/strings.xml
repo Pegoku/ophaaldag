@@ -8,6 +8,10 @@
     <string name="channel_reminders_desc">Herinnert je eraan om je afval buiten te zetten.</string>
     <string name="reminder_title">Ophaaldag %1$s</string>
     <string name="reminder_body">Buiten zetten: %1$s. Wordt %2$s opgehaald.</string>
+    <string name="reminder_done">Staat buiten</string>
+    <string name="reminder_snooze">1 uur uitstellen</string>
+    <string name="channel_alarm">Herinneringen als alarm</string>
+    <string name="channel_alarm_desc">Ophaalherinneringen op het alarmvolume die blijven klinken tot je ze wegveegt.</string>
 
     <string name="today">Vandaag</string>
     <string name="tomorrow">Morgen</string>
@@ -102,6 +106,14 @@
     <string name="reminder_time">Tijd</string>
     <string name="reminder_types">Afvalsoorten</string>
     <string name="reminder_types_all">Alle soorten</string>
+    <string name="reminder_per_type">Tijd per afvalsoort</string>
+    <string name="reminder_default_time">Standaardtijd</string>
+    <string name="reminder_use_default">Standaardtijd gebruiken</string>
+    <string name="reminder_time_summary">%1$s om %2$s</string>
+    <string name="reminder_alarm_style">Herinnering als alarm</string>
+    <string name="reminder_alarm_style_desc">Gebruikt het alarmvolume en blijft klinken tot je de melding wegveegt</string>
+    <string name="schedule_changes">Kalenderwijzigingen</string>
+    <string name="schedule_changes_desc">Meld het als Cure een ophaaldag verplaatst, laat vervallen of toevoegt</string>
     <string name="notifications_denied">Meldingen staan uit voor deze app. Zet ze aan in de systeeminstellingen om herinneringen te ontvangen.</string>
     <string name="open_system_settings">Instellingen openen</string>
     <string name="appearance">Weergave</string>

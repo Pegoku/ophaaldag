@@ -8,6 +8,10 @@
     <string name="channel_reminders_desc">Reminds you to put your waste out.</string>
     <string name="reminder_title">Pickup %1$s</string>
     <string name="reminder_body">Put out: %1$s. It is collected %2$s.</string>
+    <string name="reminder_done">Done</string>
+    <string name="reminder_snooze">Snooze 1 hour</string>
+    <string name="channel_alarm">Alarm-style reminders</string>
+    <string name="channel_alarm_desc">Pickup reminders that use the alarm volume and keep sounding until dismissed.</string>
 
     <string name="today">Today</string>
     <string name="tomorrow">Tomorrow</string>
@@ -109,6 +113,14 @@
     <string name="reminder_time">Time</string>
     <string name="reminder_types">Waste types</string>
     <string name="reminder_types_all">All types</string>
+    <string name="reminder_per_type">Time per waste type</string>
+    <string name="reminder_default_time">Default time</string>
+    <string name="reminder_use_default">Use the default time</string>
+    <string name="reminder_time_summary">%1$s at %2$s</string>
+    <string name="reminder_alarm_style">Alarm-style reminders</string>
+    <string name="reminder_alarm_style_desc">Uses the alarm volume and keeps sounding until you dismiss it</string>
+    <string name="schedule_changes">Schedule changes</string>
+    <string name="schedule_changes_desc">Notify me when Cure moves, cancels or adds a pickup date</string>
     <string name="notifications_denied">Notifications are turned off for this app. Enable them in system settings to receive reminders.</string>
     <string name="open_system_settings">Open settings</string>
     <string name="appearance">Appearance</string>

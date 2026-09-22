@@ -73,6 +73,10 @@ object CalendarSync {
         val today = LocalDate.now()
         data.pickups.filter { it.localDate?.isBefore(today.minusDays(1)) == false }.forEach { day ->
             val date = day.localDate ?: return@forEach
+            // Calendar alarms only count minutes before the event, so a morning-of reminder has no
+            // calendar equivalent; those streams get the event without an alarm.
+            val time = reminders.timeFor(day.type)
+            val alarm = reminders.enabled && reminders.includes(day.type) && time.dayBefore
             val start = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
             val values = ContentValues().apply {
                 put(CalendarContract.Events.CALENDAR_ID, calendarId)
@@ -82,12 +86,12 @@ object CalendarSync {
                 put(CalendarContract.Events.DTEND, start + 24 * 60 * 60 * 1000L)
                 put(CalendarContract.Events.ALL_DAY, 1)
                 put(CalendarContract.Events.EVENT_TIMEZONE, "UTC")
-                put(CalendarContract.Events.HAS_ALARM, if (reminders.enabled && reminders.dayBefore) 1 else 0)
+                put(CalendarContract.Events.HAS_ALARM, if (alarm) 1 else 0)
             }
             val uri = resolver.insert(CalendarContract.Events.CONTENT_URI, values) ?: return@forEach
             count++
-            if (reminders.enabled && reminders.dayBefore) {
-                val minutesBeforeMidnight = 24 * 60 - (reminders.hour * 60 + reminders.minute)
+            if (alarm) {
+                val minutesBeforeMidnight = 24 * 60 - (time.hour * 60 + time.minute)
                 resolver.insert(
                     CalendarContract.Reminders.CONTENT_URI,
                     ContentValues().apply {
@@ -124,8 +128,9 @@ object CalendarSync {
             sb.append("DTEND;VALUE=DATE:").append(fmt.format(date.plusDays(1))).append("\r\n")
             sb.append("SUMMARY:").append(escape(context.getString(R.string.calendar_event_title, data.labelFor(day.type)))).append("\r\n")
             sb.append("TRANSP:TRANSPARENT\r\n")
-            if (reminders.enabled && reminders.dayBefore) {
-                val minutes = 24 * 60 - (reminders.hour * 60 + reminders.minute)
+            val time = reminders.timeFor(day.type)
+            if (reminders.enabled && reminders.includes(day.type) && time.dayBefore) {
+                val minutes = 24 * 60 - (time.hour * 60 + time.minute)
                 sb.append("BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:Reminder\r\nTRIGGER:-PT").append(minutes).append("M\r\nEND:VALARM\r\n")
             }
             sb.append("END:VEVENT\r\n")

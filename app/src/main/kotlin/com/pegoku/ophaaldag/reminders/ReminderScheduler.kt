@@ -31,46 +31,84 @@ import java.time.ZoneId
 
 /**
  * Local replacement for the server-side push reminders of the official app.
- * Schedules a single alarm for the next reminder moment; the receiver re-arms it.
+ *
+ * Every waste type has its own reminder moment (the global default unless overridden), so one
+ * pickup day can produce several alarms: paper the evening before, GFT the same morning. Only the
+ * next moment is armed; the receiver re-arms after each one. Pickups the user marked as done are
+ * skipped, and a snoozed reminder lives on its own alarm so it survives a reschedule.
  */
 object ReminderScheduler {
+    const val ACTION_FIRE = "com.pegoku.ophaaldag.REMINDER"
+    const val ACTION_SNOOZE_FIRE = "com.pegoku.ophaaldag.REMINDER_SNOOZED"
     const val EXTRA_DATE = "date"
+    const val EXTRA_TYPES = "types"
+    const val SNOOZE_MS = 60 * 60 * 1000L
     private const val REQUEST_CODE = 4242
+    private const val REQUEST_CODE_SNOOZE = 4243
 
     data class Planned(val fireAt: LocalDateTime, val pickupDate: LocalDate, val pickups: List<PickupDay>)
 
-    fun pickupsFor(data: CureData, settings: ReminderSettings, date: LocalDate): List<PickupDay> =
-        data.pickups.filter { it.date == date.toString() && (settings.types.isEmpty() || it.type in settings.types) }
-
-    fun nextReminder(data: CureData, settings: ReminderSettings, now: LocalDateTime = LocalDateTime.now()): Planned? {
-        if (!settings.enabled) return null
-        val dates = data.pickups.mapNotNull { it.localDate }.distinct().sorted()
-        for (date in dates) {
-            val pickups = pickupsFor(data, settings, date)
-            if (pickups.isEmpty()) continue
-            val fireDate = if (settings.dayBefore) date.minusDays(1) else date
-            val fireAt = fireDate.atTime(settings.hour, settings.minute)
-            if (fireAt.isAfter(now)) return Planned(fireAt, date, pickups)
-        }
-        return null
+    /** Pickups on [date] that reminders cover, optionally narrowed to [types]. Done pickups are excluded. */
+    fun pickupsFor(
+        data: CureData,
+        settings: UserSettings,
+        date: LocalDate,
+        types: Collection<String>? = null,
+    ): List<PickupDay> = data.pickups.filter {
+        it.date == date.toString() && settings.reminders.includes(it.type) &&
+            (types == null || it.type in types) && !settings.isDone(it.date, it.type)
     }
+
+    /** Every (fire moment, pickup date, pickups) group the current data yields, earliest first. */
+    fun plan(data: CureData, settings: UserSettings): List<Planned> {
+        val r = settings.reminders
+        if (!r.enabled) return emptyList()
+        return data.pickups
+            .filter { r.includes(it.type) && !settings.isDone(it.date, it.type) }
+            .mapNotNull { p -> p.localDate?.let { Triple(fireAt(it, r.timeFor(p.type)), it, p) } }
+            .groupBy { it.first to it.second }
+            .map { (key, group) -> Planned(key.first, key.second, group.map { it.third }) }
+            .sortedBy { it.fireAt }
+    }
+
+    fun nextReminder(data: CureData, settings: UserSettings, now: LocalDateTime = LocalDateTime.now()): Planned? =
+        plan(data, settings).firstOrNull { it.fireAt.isAfter(now) }
+
+    private fun fireAt(pickup: LocalDate, time: com.pegoku.ophaaldag.data.ReminderTime): LocalDateTime =
+        (if (time.dayBefore) pickup.minusDays(1) else pickup).atTime(time.hour, time.minute)
 
     fun reschedule(context: Context, data: CureData?, settings: UserSettings) {
         val am = context.getSystemService(AlarmManager::class.java)
-        val pi = pendingIntent(context, null)
+        val pi = pendingIntent(context, null, emptyList())
         am.cancel(pi)
         if (data == null) return
-        val planned = nextReminder(data, settings.reminders) ?: return
+        val planned = nextReminder(data, settings) ?: return
         val triggerAt = planned.fireAt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val intent = pendingIntent(context, planned.pickupDate)
+        val intent = pendingIntent(context, planned.pickupDate, planned.pickups.map { it.type })
         // Bin reminders do not require exact-alarm access.
         am.setWindow(AlarmManager.RTC_WAKEUP, triggerAt, 10 * 60 * 1000L, intent)
     }
 
-    private fun pendingIntent(context: Context, date: LocalDate?): PendingIntent {
+    /** Re-shows the reminder for [types] on [date] about an hour from now. */
+    fun snooze(context: Context, date: LocalDate, types: List<String>) {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            action = "com.pegoku.ophaaldag.REMINDER"
+            action = ACTION_SNOOZE_FIRE
+            putExtra(EXTRA_DATE, date.toString())
+            putExtra(EXTRA_TYPES, types.toTypedArray())
+        }
+        val pi = PendingIntent.getBroadcast(
+            context, REQUEST_CODE_SNOOZE, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        context.getSystemService(AlarmManager::class.java)
+            .setWindow(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + SNOOZE_MS, 5 * 60 * 1000L, pi)
+    }
+
+    private fun pendingIntent(context: Context, date: LocalDate?, types: List<String>): PendingIntent {
+        val intent = Intent(context, ReminderReceiver::class.java).apply {
+            action = ACTION_FIRE
             date?.let { putExtra(EXTRA_DATE, it.toString()) }
+            if (types.isNotEmpty()) putExtra(EXTRA_TYPES, types.toTypedArray())
         }
         return PendingIntent.getBroadcast(
             context, REQUEST_CODE, intent,

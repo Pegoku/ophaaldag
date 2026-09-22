@@ -21,6 +21,8 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import androidx.glance.appwidget.updateAll
 import com.pegoku.ophaaldag.calendar.CalendarSync
 import com.pegoku.ophaaldag.data.CureRepository
@@ -60,6 +62,23 @@ class OphaaldagApplication : Application() {
         )
         nm.createNotificationChannel(
             NotificationChannel(
+                CHANNEL_ALARM,
+                getString(R.string.channel_alarm),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = getString(R.string.channel_alarm_desc)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build(),
+                )
+                enableVibration(true)
+            },
+        )
+        nm.createNotificationChannel(
+            NotificationChannel(
                 CHANNEL_SERVICE,
                 getString(R.string.channel_service),
                 NotificationManager.IMPORTANCE_DEFAULT,
@@ -70,6 +89,7 @@ class OphaaldagApplication : Application() {
     companion object {
         const val CHANNEL_REMINDERS = "reminders"
         const val CHANNEL_SERVICE = "service"
+        const val CHANNEL_ALARM = "reminders_alarm"
         fun from(context: Context): OphaaldagApplication = context.applicationContext as OphaaldagApplication
     }
 }
