@@ -6,8 +6,9 @@
     <string name="widget_no_address">Open de app om je adres in te stellen</string>
     <string name="channel_reminders">Ophaalherinneringen</string>
     <string name="channel_reminders_desc">Herinnert je eraan om je afval buiten te zetten.</string>
-    <string name="reminder_title">Ophaaldag %1$s</string>
-    <string name="reminder_body">Buiten zetten: %1$s. Wordt %2$s opgehaald.</string>
+    <string name="reminder_title">%1$s: %2$s</string>
+    <string name="reminder_body_evening">Zet het vanavond buiten. Wordt opgehaald op %1$s.</string>
+    <string name="reminder_body_morning">Zet het nu buiten. Wordt vandaag opgehaald, %1$s.</string>
     <string name="reminder_done">Staat buiten</string>
     <string name="reminder_snooze">1 uur uitstellen</string>
     <string name="channel_alarm">Herinneringen als alarm</string>

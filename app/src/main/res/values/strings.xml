@@ -6,8 +6,9 @@
     <string name="widget_no_address">Open the app to set your address</string>
     <string name="channel_reminders">Pickup reminders</string>
     <string name="channel_reminders_desc">Reminds you to put your waste out.</string>
-    <string name="reminder_title">Pickup %1$s</string>
-    <string name="reminder_body">Put out: %1$s. It is collected %2$s.</string>
+    <string name="reminder_title">%1$s: %2$s</string>
+    <string name="reminder_body_evening">Put it out tonight. Collected on %1$s.</string>
+    <string name="reminder_body_morning">Put it out now. Collected today, %1$s.</string>
     <string name="reminder_done">Done</string>
     <string name="reminder_snooze">Snooze 1 hour</string>
     <string name="channel_alarm">Alarm-style reminders</string>
