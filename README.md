@@ -1,5 +1,9 @@
 # Ophaaldag
 
+[![Android CI](https://github.com/Pegoku/ophaaldag/actions/workflows/android.yml/badge.svg)](https://github.com/Pegoku/ophaaldag/actions/workflows/android.yml)
+[![License: GPL v3](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Pegoku/ophaaldag)](https://github.com/Pegoku/ophaaldag/releases/latest)
+
 A community-made, Material 3 Expressive Android client for the **Cure Afvalbeheer** waste
 calendar (Eindhoven, Geldrop-Mierlo, Valkenswaard). It talks to the same public web service
 as the official `nl.opzet.cure` app, documented in [docs/API.md](docs/API.md).
@@ -16,6 +20,23 @@ Not affiliated with Cure Afvalbeheer or AddComm.
 - Home-screen widget with the next pickups
 - Offline: the last document is cached and shown instantly; pull to refresh
 - Dynamic colour (Material You) with a green fallback palette, Dutch and English UI
+
+## Screenshots
+
+| Home | Calendar | Waste guide | Containers |
+|:--:|:--:|:--:|:--:|
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1_home.png" width="200"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2_calendar.png" width="200"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3_guide.png" width="200"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4_containers.png" width="200"> |
+
+Dark theme:
+
+| Home | Calendar |
+|:--:|:--:|
+| <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5_home_dark.png" width="200"> | <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6_calendar_dark.png" width="200"> |
+
+## Install
+
+Download the APK from the [latest release](https://github.com/Pegoku/ophaaldag/releases/latest),
+or build it yourself (see below). Requires Android 8.0 (API 26) or newer.
 
 ## App icon
 
