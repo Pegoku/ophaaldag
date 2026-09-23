@@ -12,6 +12,7 @@ Not affiliated with Cure Afvalbeheer or AddComm.
 ## Features
 
 - Pickup calendar: next pickup hero, upcoming list, month grid with per-stream colours and filters
+- The hero, the upcoming list and the widget move on to the next date once the day's collection time (Settings, default 12:00) has passed
 - Waste guide: separation info per stream plus a searchable "Afval-ABC" of ~1,900 household items
 - Announcements, service-message history and municipality tips/contact pages
 - Nearby public containers (glass, paper, textile, residual) sorted by distance, opens in Maps

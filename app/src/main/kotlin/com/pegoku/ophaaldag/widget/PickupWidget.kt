@@ -62,7 +62,7 @@ class PickupWidget : GlanceAppWidget() {
         val app = OphaaldagApplication.from(context)
         app.repository.awaitCache()
         val data = app.repository.state.value.data
-        val upcoming = app.repository.upcoming(limit = 4)
+        val upcoming = app.repository.upcoming(app.settings.current().collectedBy, limit = 4)
         provideContent {
             GlanceTheme {
                 WidgetContent(context, data, upcoming)

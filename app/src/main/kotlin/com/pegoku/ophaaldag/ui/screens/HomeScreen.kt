@@ -61,16 +61,19 @@ import com.pegoku.ophaaldag.R
 import com.pegoku.ophaaldag.data.CureData
 import com.pegoku.ophaaldag.data.DataState
 import com.pegoku.ophaaldag.data.PickupDay
+import com.pegoku.ophaaldag.data.Pickups
 import com.pegoku.ophaaldag.ui.components.SectionTitle
 import com.pegoku.ophaaldag.ui.components.WasteIcon
 import com.pegoku.ophaaldag.ui.components.ageText
 import com.pegoku.ophaaldag.util.Dates
 import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 fun HomeScreen(
     data: CureData,
     state: DataState,
+    collectedBy: LocalTime,
     onRefresh: () -> Unit,
     onOpenWaste: (String) -> Unit,
     onOpenAnnouncement: (String) -> Unit,
@@ -80,7 +83,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val today = LocalDate.now()
-    val upcoming = data.pickups.filter { it.localDate?.isBefore(today) == false }
+    val upcoming = Pickups.upcoming(data.pickups, collectedBy)
     val nextDate = upcoming.firstOrNull()?.localDate
     val nextGroup = upcoming.filter { it.localDate == nextDate }
     val later = upcoming.filter { it.localDate != nextDate }.take(10)

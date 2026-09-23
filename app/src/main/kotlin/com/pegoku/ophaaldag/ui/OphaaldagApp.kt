@@ -189,7 +189,7 @@ private fun MainScaffold(vm: AppViewModel, settings: UserSettings, state: DataSt
             ) { route ->
                 when {
                     route == "tab:HOME" -> HomeScreen(
-                        data = data, state = state,
+                        data = data, state = state, collectedBy = settings.collectedBy,
                         onRefresh = { vm.refresh() },
                         onOpenWaste = { push(Routes.waste(it)) },
                         onOpenAnnouncement = { push(Routes.announcement(it)) },
@@ -199,7 +199,8 @@ private fun MainScaffold(vm: AppViewModel, settings: UserSettings, state: DataSt
                     route == "tab:CALENDAR" -> CalendarScreen(data = data, onOpenWaste = { push(Routes.waste(it)) })
                     route == "tab:GUIDE" -> GuideScreen(data = data, onOpenWaste = { push(Routes.waste(it)) })
                     route == "tab:MORE" -> MoreScreen(data = data, onNavigate = push)
-                    route.startsWith("waste/") -> WasteDetailScreen(data, route.removePrefix("waste/"), onBack = pop)
+                    route.startsWith("waste/") ->
+                        WasteDetailScreen(data, route.removePrefix("waste/"), settings.collectedBy, onBack = pop)
                     route.startsWith("announcement/") -> AnnouncementDetailScreen(data, route.removePrefix("announcement/"), onBack = pop)
                     route == Routes.ANNOUNCEMENTS -> AnnouncementsScreen(data, onBack = pop, onOpen = { push(Routes.announcement(it)) })
                     route == Routes.MESSAGES -> MessagesScreen(data, onBack = pop)

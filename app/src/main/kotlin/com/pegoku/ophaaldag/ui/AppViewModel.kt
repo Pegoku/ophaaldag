@@ -20,6 +20,7 @@ package com.pegoku.ophaaldag.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.glance.appwidget.updateAll
 import com.pegoku.ophaaldag.OphaaldagApplication
 import com.pegoku.ophaaldag.calendar.CalendarSync
 import com.pegoku.ophaaldag.calendar.DeviceCalendar
@@ -30,6 +31,7 @@ import com.pegoku.ophaaldag.data.DataState
 import com.pegoku.ophaaldag.data.ReminderSettings
 import com.pegoku.ophaaldag.data.UserSettings
 import com.pegoku.ophaaldag.reminders.ReminderScheduler
+import com.pegoku.ophaaldag.widget.PickupWidget
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -118,6 +120,14 @@ class AppViewModel(private val app: OphaaldagApplication) : ViewModel() {
             ReminderScheduler.reschedule(app, data.value.data, current)
             val d = data.value.data
             if (d != null && current.calendarId != null) CalendarSync.sync(app, current.calendarId, d, reminders)
+        }
+    }
+
+    /** Time of day after which today's pickup counts as collected. */
+    fun setCollectedBy(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            app.settings.setCollectedBy(hour, minute)
+            runCatching { PickupWidget().updateAll(app) }
         }
     }
 

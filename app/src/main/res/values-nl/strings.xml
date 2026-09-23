@@ -108,6 +108,9 @@
 
     <string name="address">Adres</string>
     <string name="change_address">Adres wijzigen</string>
+    <string name="pickup_day">Ophaaldag</string>
+    <string name="collected_by">Opgehaald vóór</string>
+    <string name="collected_by_desc">Na dit tijdstip beschouwt de app de ophaaldag van vandaag als klaar en toont hij de volgende datum</string>
     <string name="reminders">Herinneringen</string>
     <string name="reminders_enable">Herinner me vóór een ophaaldag</string>
     <string name="reminder_when">Wanneer</string>

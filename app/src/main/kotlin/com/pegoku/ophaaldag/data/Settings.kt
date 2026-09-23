@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
+import java.time.LocalTime
 import java.util.Locale
 
 val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -67,7 +68,17 @@ data class UserSettings(
     val lastSeenPush: String = "",
     /** Pickups the user marked as put out, as `date|type`. Pruned once the date has passed. */
     val donePickups: Set<String> = emptySet(),
+    /** Local time the round is assumed to be finished; see [collectedBy]. */
+    val collectedByHour: Int = 12,
+    val collectedByMinute: Int = 0,
 ) {
+    /**
+     * Time of day after which a pickup counts as collected. Cure publishes dates without a time,
+     * so this is what tells the app that today's pickup is behind us and the next date is the one
+     * to show.
+     */
+    val collectedBy: LocalTime get() = LocalTime.of(collectedByHour, collectedByMinute)
+
     fun isDone(date: String, type: String): Boolean = doneKey(date, type) in donePickups
 
     companion object {
@@ -100,6 +111,8 @@ class SettingsRepository(private val context: Context) {
         val calendarId = longPreferencesKey("calendar_id")
         val calendarName = stringPreferencesKey("calendar_name")
         val lastSeenPush = stringPreferencesKey("last_seen_push")
+        val collectedByHour = intPreferencesKey("collected_by_hour")
+        val collectedByMinute = intPreferencesKey("collected_by_minute")
     }
 
     val settings: Flow<UserSettings> = context.settingsStore.data.map { p -> p.toSettings() }
@@ -130,6 +143,8 @@ class SettingsRepository(private val context: Context) {
             calendarName = this[Keys.calendarName] ?: "",
             lastSeenPush = this[Keys.lastSeenPush] ?: "",
             donePickups = this[Keys.remDone] ?: emptySet(),
+            collectedByHour = this[Keys.collectedByHour] ?: 12,
+            collectedByMinute = this[Keys.collectedByMinute] ?: 0,
         )
     }
 
@@ -166,6 +181,13 @@ class SettingsRepository(private val context: Context) {
             p[Keys.remTypes] = r.types
             p[Keys.remAlarmStyle] = r.alarmStyle
             p[Keys.remDateChanges] = r.dateChanges
+        }
+    }
+
+    suspend fun setCollectedBy(hour: Int, minute: Int) {
+        context.settingsStore.edit { p ->
+            p[Keys.collectedByHour] = hour
+            p[Keys.collectedByMinute] = minute
         }
     }
 

@@ -32,7 +32,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class DataState(
     val data: CureData? = null,
@@ -121,8 +122,13 @@ class CureRepository(
         onDataChanged(null, null)
     }
 
-    fun upcoming(from: LocalDate = LocalDate.now(), limit: Int = Int.MAX_VALUE): List<PickupDay> =
-        _state.value.data?.pickups?.filter { d -> d.localDate?.let { !it.isBefore(from) } == true }?.take(limit) ?: emptyList()
+    /** Pickups still to come, dropping today's once [collectedBy] has passed. */
+    fun upcoming(
+        collectedBy: LocalTime,
+        limit: Int = Int.MAX_VALUE,
+        now: LocalDateTime = LocalDateTime.now(),
+    ): List<PickupDay> =
+        _state.value.data?.pickups?.let { Pickups.upcoming(it, collectedBy, now).take(limit) } ?: emptyList()
 
     companion object {
         const val STALE_AFTER_MS = 6 * 60 * 60 * 1000L

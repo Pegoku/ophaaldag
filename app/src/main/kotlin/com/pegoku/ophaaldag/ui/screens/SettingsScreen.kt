@@ -86,6 +86,7 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
     val context = LocalContext.current
     val reminders = settings.reminders
     var showTimePicker by remember { mutableStateOf(false) }
+    var showCollectedByPicker by remember { mutableStateOf(false) }
     var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         notificationsEnabled = granted
@@ -119,6 +120,27 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
                     }
                     FilledTonalButton(onClick = onChangeAddress) { Text(stringResource(R.string.change_address)) }
                 }
+            }
+
+            SectionTitle(stringResource(R.string.pickup_day), modifier = Modifier.padding(top = 12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                shape = MaterialTheme.shapes.extraLarge,
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.collected_by)) },
+                    supportingContent = { Text(stringResource(R.string.collected_by_desc)) },
+                    trailingContent = {
+                        Text(
+                            "%02d:%02d".format(settings.collectedByHour, settings.collectedByMinute),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    },
+                    colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    modifier = Modifier.clickable { showCollectedByPicker = true },
+                )
             }
 
             SectionTitle(stringResource(R.string.notifications), modifier = Modifier.padding(top = 12.dp))
@@ -324,6 +346,26 @@ fun SettingsScreen(vm: AppViewModel, settings: UserSettings, data: CureData, onB
             },
             dismissButton = { TextButton(onClick = { showTimePicker = false }) { Text(stringResource(R.string.cancel)) } },
             title = { Text(stringResource(R.string.reminder_time)) },
+        ) {
+            TimePicker(state = state)
+        }
+    }
+
+    if (showCollectedByPicker) {
+        val state = rememberTimePickerState(
+            initialHour = settings.collectedByHour,
+            initialMinute = settings.collectedByMinute,
+            is24Hour = true,
+        )
+        TimePickerDialog(
+            onDismissRequest = { showCollectedByPicker = false },
+            confirmButton = {
+                TextButton(onClick = { vm.setCollectedBy(state.hour, state.minute); showCollectedByPicker = false }) {
+                    Text(stringResource(R.string.ok))
+                }
+            },
+            dismissButton = { TextButton(onClick = { showCollectedByPicker = false }) { Text(stringResource(R.string.cancel)) } },
+            title = { Text(stringResource(R.string.collected_by)) },
         ) {
             TimePicker(state = state)
         }

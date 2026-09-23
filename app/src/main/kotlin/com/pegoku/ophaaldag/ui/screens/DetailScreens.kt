@@ -74,6 +74,7 @@ import androidx.core.net.toUri
 import com.pegoku.ophaaldag.R
 import com.pegoku.ophaaldag.data.ContainerLocation
 import com.pegoku.ophaaldag.data.CureData
+import com.pegoku.ophaaldag.data.Pickups
 import com.pegoku.ophaaldag.data.WasteTypes
 import com.pegoku.ophaaldag.ui.components.DetailTopBar
 import com.pegoku.ophaaldag.ui.components.HtmlText
@@ -83,13 +84,14 @@ import com.pegoku.ophaaldag.util.Dates
 import com.pegoku.ophaaldag.util.Geo
 import com.pegoku.ophaaldag.util.MapPlace
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.math.roundToInt
 
 @Composable
-fun WasteDetailScreen(data: CureData, type: String, onBack: () -> Unit) {
+fun WasteDetailScreen(data: CureData, type: String, collectedBy: LocalTime, onBack: () -> Unit) {
     val info = data.separationFor(type)
     val today = LocalDate.now()
-    val next = data.pickups.filter { it.type == type && it.localDate?.isBefore(today) == false }.take(6)
+    val next = Pickups.upcoming(data.pickups.filter { it.type == type }, collectedBy).take(6)
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val context = LocalContext.current
     Scaffold(

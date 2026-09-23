@@ -115,6 +115,9 @@
     <!-- Settings -->
     <string name="address">Address</string>
     <string name="change_address">Change address</string>
+    <string name="pickup_day">Pickup day</string>
+    <string name="collected_by">Collected by</string>
+    <string name="collected_by_desc">After this time the app treats today\'s pickup as done and shows the next date</string>
     <string name="reminders">Reminders</string>
     <string name="reminders_enable">Remind me before a pickup</string>
     <string name="reminder_when">When</string>
